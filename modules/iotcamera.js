@@ -36,4 +36,5 @@ module.exports = function (app) {
     client_sock.on("error", function(err) {
       console.log("error", err);
     });
+  }  
 };

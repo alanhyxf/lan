@@ -5,7 +5,7 @@ var db = new Database();
 
 module.exports = function (app) {
   'use strict';
-  return function (socket) {
+  return function (client_sock) {
 
 
 

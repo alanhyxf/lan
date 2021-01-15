@@ -1,17 +1,20 @@
 var configure=require("./app").configure;
 var _ = require('underscore');
+var iotcamera = require("net");
 var mqtt = require("mqtt");
 var coap = require("coap");
 var WebSocketServer = require('ws').Server;
+
 var config = require('config');
 
 start = function (opts, callback) {
   var app = configure();
 
+  
+
   app.listen(config.get('port.http'), function () {
     console.log("http server run on port %d", config.get('port.http'));
   });
-
 
   if (_.include(app.config.get('modules'), 'websocket')) {
     var webSocketServer = new WebSocketServer({port: config.get('port.websocket')});
@@ -30,6 +33,14 @@ start = function (opts, callback) {
       console.log("mqtt server listening on port %d", config.get('port.mqtt'));
     });
   }
+
+  if (_.include(app.config.get('modules'), 'iotcamera')) {
+    net.createServer(app.iotcamera).listen(config.get('port.iotcamera'), function () {
+      console.log("iotcamera server listening on port %d", config.get('port.iotcamera'));
+    });
+  }
+
+
   return app;
 };
 

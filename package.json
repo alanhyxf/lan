@@ -1,13 +1,13 @@
 {
   "name": "lan",
-  "version": "0.2.0",
-  "description": "Internet of Things Server Layer with CoAP, WebSocket, MQTT, HTTP Protocol.",
-  "homepage": "https://github.com/phodal/lan",
+  "version": "0.1.0",
+  "description": "Internet of Things Server Layer with Raw,CoAP, WebSocket, MQTT, HTTP Protocol.",
+  "homepage": "https://github.com/alanhyxf/lan",
   "repository": {
     "type": "git",
-    "url": "https://github.com/phodal/lan.git"
+    "url": "https://github.com/alanhyxf/lan.git"
   },
-  "author": "Phodal Huang",
+  "author": "Alan Huang",
   "files": [
     "dist"
   ],
@@ -22,7 +22,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/phodal/lan/issues"
+    "url": "https://github.com/alanhyxf/lan/issues"
   },
   "dependencies": {
     "body-parser": "~1.13.2",

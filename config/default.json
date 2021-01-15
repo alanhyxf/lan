@@ -7,13 +7,15 @@
     "coap",
     "http",
     "mqtt",
-    "websocket"
+    "websocket",
+    "iotcamera"
   ],
   "port": {
     "http": 8899,
     "websocket": 8898,
     "coap": 5683,
-    "mqtt": 1883
+    "mqtt": 1883,
+    "iotcamera":8890
   },
   "logging": true,
   "secret": "keyboard cat"

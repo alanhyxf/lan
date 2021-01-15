@@ -14,11 +14,7 @@ Test on Node Version: ``v5``,``v6``
 
 ![IoT Struct](docs/struct.png)
 
-详细可见：《自己动手设计物联网》
 
-![Designiot](docs/design-iot.jpg)
-
-立即购买：[亚马逊](https://www.amazon.cn/dp/B01IBZWTWW/ref=wl_it_dp_o_pC_nS_ttl?_encoding=UTF8&colid=BDXF90QZX6WX&coliid=I19EB97K0GNLW8)、[京东](http://search.jd.com/Search?keyword=%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E8%AE%BE%E8%AE%A1%E7%89%A9%E8%81%94%E7%BD%91&enc=utf-8&wq=%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E8%AE%BE%E8%AE%A1%E7%89%A9%E8%81%94%E7%BD%91&pvid=k24y6hri.l4xi28)
 
 ## Lan Server Layer:
 
@@ -38,13 +34,15 @@ Test on Node Version: ``v5``,``v6``
     "coap",
     "http",
     "mqtt",
-    "websocket"
+    "websocket",
+    "4gcamera"
   ],
   "port": {
     "http": 8899,
     "websocket": 8898,
     "coap": 5683,
-    "mqtt": 1883
+    "mqtt": 1883,
+    "4gcamera":8897
   },
   "logging" :true,
   "secret": "keyboard cat"
@@ -59,11 +57,7 @@ Use ``bcrypt``, please install it:
 
     npm install --save bcrypt
 
-## Docker
 
-``Require``: Docker
-
-    docker build .
 
 ## 安装(Setup)
 
@@ -76,7 +70,7 @@ Use ``bcrypt``, please install it:
 
 1.Clone
 
-	git clone https://github.com/phodal/lan --recursive
+	git clone https://github.com/alanhyxf/lan --recursive
 
 2.安装依赖
 
@@ -177,6 +171,9 @@ Message
 
     node test_scripts/ws_test.js
 
+### 4GcCamera 
+
+
 ## Auth
 
 Standalone (单机)
@@ -195,5 +192,5 @@ Multi
 
 ## License
 
-© 2015~2016 [Phodal](https://www.phodal.com/). This code is distributed under the MIT license.
+This code is distributed under the MIT license.
 

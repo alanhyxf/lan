@@ -30,8 +30,20 @@ module.exports = function (app) {
       {
         let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
         console.log(dataobj.firmware_version);
-      }
-      client_sock.write("C28C0DB26D39331A{\"msg_type\":1,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+
+        var payload = {
+          name: dataobj.device_id,
+          token: dataobj.timestamp,
+          data: data.slice(data.indexOf("{"),data.indexOf("}")+1)
+        };
+        db.insert(payload);
+        if(dataobj.firmware_version==1)
+        {
+          client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+        }
+
+      };
+      
    
       //client_sock.end(); // 正常关闭
     });

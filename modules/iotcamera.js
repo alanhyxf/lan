@@ -27,9 +27,9 @@ module.exports = function (app) {
     client_sock.on("data", function(data) {
       console.log(data);
    
-      client_sock.write("goodbye!!!");
+      client_sock.write("C28C0DB26D39331A{\"msg_type\":1,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
    
-      client_sock.end(); // 正常关闭
+      //client_sock.end(); // 正常关闭
     });
    
    

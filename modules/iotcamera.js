@@ -28,8 +28,8 @@ module.exports = function (app) {
       console.log(data);
       if ((data.indexOf("C28C0DB26D39331A")!=-1) && (data.indexOf("15B86F2D013B2618")!=-1))
       {
-        console.log(data.slice(data.indexOf("{"),data.indexOf("}")))
-
+        let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
+        console.log(dataobj.firmware_version);
       }
       client_sock.write("C28C0DB26D39331A{\"msg_type\":1,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
    

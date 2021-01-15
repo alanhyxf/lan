@@ -1,6 +1,6 @@
 var configure=require("./app").configure;
 var _ = require('underscore');
-var iotcamera = require("net");
+var net = require("net");
 var mqtt = require("mqtt");
 var coap = require("coap");
 var WebSocketServer = require('ws').Server;

@@ -3,8 +3,9 @@
 var models = require('../models');
 
 module.exports = {
-  up: function (queryInterface, Sequelize, done) {
-    models.User.create({
+  up: function (queryInterface, Sequelize) {
+    return queryInterface.bulkInsert('Users', [
+      {
       name: 'root',
       password: 'root',
       expiration: '2016-03-03',
@@ -12,12 +13,15 @@ module.exports = {
       phone: '12345678901',
       isAdmin: true,
       alias: 'fengda'
-    }).then(function () {
-      done();
-    })
+      },
+      ], {}
+    );
+
+    
   },
 
-  down: function (queryInterface, Sequelize, done) {
-    return queryInterface.dropTable('Users');
+  down: function (queryInterface, Sequelize) {
+    return queryInterface.bulkDelete('Users', null, {});
+
   }
 };

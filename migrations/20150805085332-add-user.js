@@ -18,6 +18,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize, done) {
-    done();
+    return queryInterface.dropTable('Users');
   }
 };

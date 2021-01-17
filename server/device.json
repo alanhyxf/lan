@@ -1,0 +1,224 @@
+{
+  "version": "1.0",
+  "profile": {
+    "ProductId": "7FUBIG3E75",
+    "CategoryId": "1"
+ },
+  "properties": [
+    {
+      "id": "Status",
+      "name": "是否开机",
+      "desc": "",
+      "mode": "rw",
+      "define": {
+        "type": "bool",
+        "mapping": {
+          "0": "关",
+          "1": "开"
+        }
+      },
+      "required": false
+    }
+  ],
+  "events": [],
+  "actions": [
+    {
+      "id": "CAM",
+      "name": "抓拍",
+      "desc": "",
+      "input": [
+        {
+          "id": "timestamp",
+          "name": "时间",
+          "define": {
+            "type": "timestamp"
+          }
+        },
+        {
+          "id": "action",
+          "name": "动作",
+          "define": {
+            "type": "enum",
+            "mapping": {
+              "0": "拍照",
+              "1": "录像"
+            }
+          }
+        },
+        {
+          "id": "http_url",
+          "name": "长传地址",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "count",
+          "name": "拍照数量",
+          "define": {
+            "type": "int",
+            "min": "0",
+            "max": "10",
+            "start": "1",
+            "step": "1",
+            "unit": ""
+          }
+        }
+      ],
+      "output": [
+        {
+          "id": "err",
+          "name": "错误代码",
+          "define": {
+            "type": "int",
+            "min": "0",
+            "max": "9",
+            "start": "0",
+            "step": "1",
+            "unit": ""
+          }
+        },
+        {
+          "id": "firmware_version",
+          "name": "固件版本号",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "device_id",
+          "name": "设备号",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "device_type",
+          "name": "设备类型",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "timestamp",
+          "name": "时间戳",
+          "define": {
+            "type": "timestamp"
+          }
+        },
+        {
+          "id": "battery",
+          "name": "电池电压",
+          "define": {
+            "type": "float",
+            "min": "0",
+            "max": "100",
+            "start": "0",
+            "step": "1",
+            "unit": ""
+          }
+        },
+        {
+          "id": "signal",
+          "name": "信号强度",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        }
+      ],
+      "required": false
+    },
+    {
+      "id": "GetStatus",
+      "name": "实时状态",
+      "desc": "",
+      "input": [
+        {
+          "id": "timestamp",
+          "name": "时间戳",
+          "define": {
+            "type": "timestamp"
+          }
+        }
+      ],
+      "output": [
+        {
+          "id": "err",
+          "name": "错误号",
+          "define": {
+            "type": "enum",
+            "mapping": {
+              "0": "成功"
+            }
+          }
+        },
+        {
+          "id": "device_id",
+          "name": "设备号",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "device_type",
+          "name": "设备类型",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "firmware_version",
+          "name": "固件版本",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        },
+        {
+          "id": "timestamp",
+          "name": "时间错",
+          "define": {
+            "type": "timestamp"
+          }
+        },
+        {
+          "id": "battery",
+          "name": "电池电压",
+          "define": {
+            "type": "float",
+            "min": "0",
+            "max": "100",
+            "start": "0",
+            "step": "1",
+            "unit": ""
+          }
+        },
+        {
+          "id": "signal",
+          "name": "信号强度",
+          "define": {
+            "type": "string",
+            "min": "0",
+            "max": "2048"
+          }
+        }
+      ],
+      "required": false
+    }
+  ]
+}

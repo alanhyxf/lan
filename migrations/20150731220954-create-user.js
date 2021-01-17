@@ -20,7 +20,7 @@ module.exports = {
       isAdmin: {
         type: Sequelize.BOOLEAN
       },
-      uid: {
+      uuid: {
         type: Sequelize.UUID
       },
       phone: {

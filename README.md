@@ -1,8 +1,5 @@
 # Lan IoT Server
 
-[![Build Status](https://travis-ci.org/phodal/lan.svg?branch=master)](https://travis-ci.org/phodal/lan)
-[![Code Climate](https://codeclimate.com/github/phodal/lan/badges/gpa.svg)](https://codeclimate.com/github/phodal/lan)
-[![Test Coverage](https://codeclimate.com/github/phodal/lan/badges/coverage.svg)](https://codeclimate.com/github/phodal/lan/coverage)
 
 > Internet of Things Server Layer with CoAP, WebSocket, MQTT, HTTP Protocol.
 
@@ -35,14 +32,14 @@ Test on Node Version: ``v5``,``v6``
     "http",
     "mqtt",
     "websocket",
-    "4gcamera"
+    "iotcamera"
   ],
   "port": {
     "http": 8899,
     "websocket": 8898,
     "coap": 5683,
     "mqtt": 1883,
-    "4gcamera":8897
+    "iotcamera":8890
   },
   "logging" :true,
   "secret": "keyboard cat"
@@ -51,7 +48,7 @@ Test on Node Version: ``v5``,``v6``
 
 encrypt: ["crypto", "bcrypt"]
 
-modules: ["coap", "http", "mqtt", "websocket"]
+modules: ["coap", "http", "mqtt", "websocket","iotcamera"]
 
 Use ``bcrypt``, please install it:
 
@@ -171,7 +168,7 @@ Message
 
     node test_scripts/ws_test.js
 
-### 4GcCamera 
+### iotcCamera 
 
 
 ## Auth

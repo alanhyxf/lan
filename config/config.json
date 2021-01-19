@@ -1,8 +1,11 @@
 {
   "development": {
-    "dialect": "sqlite",
-    "storage": "./db.development.sqlite",
-    "logging": false
+    "dialect": "mysql",
+    "username": "iot",
+    "password": "Yxfhalan1",
+    "database": "IOT",
+    "host": "172.16.16.9",
+    "logging": true
   },
   "test": {
     "dialect": "sqlite",
@@ -10,10 +13,10 @@
     "logging": false
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "iot",
+    "password": "Yxfhalan1",
+    "database": "IOT",
+    "host": "172.16.16.9",
     "dialect": "mysql"
   }
 }

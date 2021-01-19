@@ -1,6 +1,7 @@
 var Database = require('../persistence/mongo');
 var db = new Database();
 //var authCheck = require('../auth/basic');
+var deviceCheck = require('../auth/deviceCheck');
 //var getAuthInfo = require('./utils/getAuth');
 var mqtt = require("mqtt");
 
@@ -19,24 +20,33 @@ module.exports = function (app) {
       console.log("close socket");
     });
    
-    function ConvertMqtt(msg){
+    var ConvertMqtt= function(msg) {
+
+      var DeviceInfo = {
+        device_id: msg.device_id
+      };
+
+      var oldDevice = function (deviceInfo) {
+      //已经注册过的设备
+      console.log("Device Exist："+deviceInfo.device_id);
+      };
+    
+      var newDevice = function (deviceInfo) {
+      //新注册设备  
+      console.log("Device New:"+deviceInfo.device_id);
+      };
+    
+    
+      deviceCheck(DeviceInfo, oldDevice, newDevice);
+
       var client  = mqtt.connect('mqtt://EG3DYFIS5P.iotcloud.tencentdevices.com',{
         username:'EG3DYFIS5Pdev202101;12010126;8VMXV;1611493674',
         password:'41c3c61ce8c38833bb8d8defb17b1a0394f22903104236aa0c368ce07e41300a;hmacsha256',
-        clientId:'dev202101'
-      });
-     // client.publish('test', 'Hello mqtt ' + (++num), {qos:1},() => console.log(num));
-     client.on('connect', function () {
-     //   client.subscribe('test');
-        client.publish('EG3DYFIS5P/dev202101/event', msg);
-        console.log("mqtt con ok");
+        clientId:deviceInfo.device_id
       });
 
-      client.on('message', function (topic, message) {
-        // message is Buffer 
-        console.log(message.toString());   
-        client.end();
-      });
+       client.publish('EG3DYFIS5P/dev202101/event', msg);
+       client.end();
     }
     // 接收到客户端的数据，调用这个函数
     // data 默认是Buffer对象，如果你强制设置为utf8,那么底层会先转换成utf8的字符串，传给你
@@ -44,22 +54,30 @@ module.exports = function (app) {
     // 如果你没有设置任何编码 <Buffer 48 65 6c 6c 6f 57 6f 72 6c 64 21>
     // utf8 --> HelloWorld!!!   hex--> "48656c6c6f576f726c6421"
     client_sock.on("data", function(data) {
-      console.log(data);
+      console.log("Incoming IOTCamera Data");
       if ((data.indexOf("C28C0DB26D39331A")!=-1) && (data.indexOf("15B86F2D013B2618")!=-1))
       {
         let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
-        console.log(dataobj.firmware_version);
+        console.log("IOTCamera Data Type:"+dataobj.msg_type);
 
+        /*
         var payload = {
           name: dataobj.device_id,
           token: dataobj.timestamp,
           data: data.slice(data.indexOf("{"),data.indexOf("}")+1)
         };
         db.insert(payload);
-        if(dataobj.firmware_version==1)
+        */
+
+        if(dataobj.msg_type==1)
         {
           client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
-          ConvertMqtt("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+          var msg = {
+            msg_type:2,
+            device_id: dataobj.device_id,
+            timestamp: parseInt(+new Date()/1000)
+          };       
+          ConvertMqtt(msg);
         }
       };
       

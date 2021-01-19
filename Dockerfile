@@ -35,7 +35,7 @@ RUN apt-get install -y nodejs
 # Define working directory.
 
 RUN cd /home
-RUN git clone http://github.com/phodal/lan /home/lan
+RUN git clone http://github.com/alanhyxf/lan /home/lan
 
 WORKDIR /home/lan
 RUN npm install --production

@@ -23,26 +23,39 @@ module.exports = function (app) {
     var ConvertMqtt= function(msg) {
 
       var DeviceInfo = {
-        device_id: msg.device_id
+        device_id: msg.device_id;
+
       };
 
       var oldDevice = function (deviceInfo) {
       //已经注册过的设备
-      console.log("Device Exist："+deviceInfo.device_id);
+        console.log("Device Exist："+deviceInfo.device_id);
       };
     
       var newDevice = function (deviceInfo) {
-      //新注册设备  
-      console.log("Device New:"+deviceInfo.device_id);
+        //新注册设备  
+        console.log("Device New:"+deviceInfo.device_id);
+        models.Device.build(deviceInfo)
+          .validate()
+          .then(function (err) {
+          if (err) {
+            return err.errors; 
+          }
+        });
+        models.Device.create(deviceInfo).then(function (device, err) {
+            if (err) {
+              return err.errors; 
+            }
+        });
       };
-    
+   
     
       deviceCheck(DeviceInfo, oldDevice, newDevice);
 
       var client  = mqtt.connect('mqtt://EG3DYFIS5P.iotcloud.tencentdevices.com',{
         username:'EG3DYFIS5Pdev202101;12010126;8VMXV;1611493674',
         password:'41c3c61ce8c38833bb8d8defb17b1a0394f22903104236aa0c368ce07e41300a;hmacsha256',
-        clientId:deviceInfo.device_id
+        clientId:DeviceInfo.device_id
       });
 
        client.publish('EG3DYFIS5P/dev202101/event', msg);
@@ -75,6 +88,9 @@ module.exports = function (app) {
           var msg = {
             msg_type:2,
             device_id: dataobj.device_id,
+            signal:dataobj.signal,
+            battery:dataobj.battery,
+            firmware_version:dataobj.firmware_version,
             timestamp: parseInt(+new Date()/1000)
           };       
           ConvertMqtt(msg);

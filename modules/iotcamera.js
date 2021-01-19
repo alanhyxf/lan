@@ -47,10 +47,12 @@ module.exports = function (app) {
             return err.errors; 
           }
         });
+
+        
+
         model.Device.create(deviceInfo).then(function (device, err) {
           var http = require('http');
           var querystring = require('querystring');
-         // var contents = querystring.stringify({
           var contents = {
             productId:'EG3DYFIS5P',
             deviceName:device.device_id,
@@ -61,28 +63,35 @@ module.exports = function (app) {
           let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
           var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
           contents["signature"] = crypto.createHmac('sha1', app_secret).update(str2).digest('hex').toString('base64'); 
-           
-        });
+          var contentstr = querystring.stringify(contents); 
 
-        var options = {
-          host:'ap-guangzhou.gateway.tencentdevices.com',
-          path:'/register/dev',
-          method:'POST',
-          headers:{
-              'Content-Type':'application/x-www-form-urlencoded',
-              'Content-Length':Contents.length
-          }
-        };
-
-        var req = http.request(options, function(res){
-          res.setEncoding('utf8');
-          res.on('data',function(data){
-              console.log("data:",data);   //一段html代码
+          var options = {
+            host:'ap-guangzhou.gateway.tencentdevices.com',
+            path:'/register/dev',
+            method:'POST',
+            headers:{
+                'Content-Type':'application/x-www-form-urlencoded',
+                'Content-Length':contentstr.length
+            }
+          };
+          
+          var req = http.request(options, function(res){
+            res.setEncoding('utf8');
+            res.on('data',function(data){
+                console.log("data:",data);   //一段html代码
+            });
           });
+  
+          req.write(contents);
+          req.end;
+
+
+                     
         });
 
-        req.write(Contents);
-        req.end;
+        
+
+        
       };
    
     

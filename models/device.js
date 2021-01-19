@@ -36,6 +36,7 @@ module.exports = function (sequelize, DataTypes) {
     },
     
     signal: DataTypes.STRING,
+    firmware_version: DataTypes.STRING,
     battery: DataTypes.STRING
   }, {
     classMethods: {

@@ -5,7 +5,7 @@ var deviceCheck = require('../auth/deviceCheck');
 //var getAuthInfo = require('./utils/getAuth');
 var mqtt = require("mqtt");
 var model = require('../models');
-
+const crypto = require('crypto');
 
 
 module.exports = function (app) {
@@ -40,7 +40,7 @@ module.exports = function (app) {
       var newDevice = function (deviceInfo) {
         //新注册设备  
         console.log("Device New:"+deviceInfo.device_id);
-        models.Device.build(deviceInfo)
+        model.Device.build(deviceInfo)
           .validate()
           .then(function (err) {
           if (err) {
@@ -48,10 +48,40 @@ module.exports = function (app) {
           }
         });
         models.Device.create(deviceInfo).then(function (device, err) {
-            if (err) {
-              return err.errors; 
-            }
+          var http = require('http');
+          var querystring = require('querystring');
+         // var contents = querystring.stringify({
+          var contents = {
+            productId:'EG3DYFIS5P',
+            deviceName:device.device_id,
+            nonce:crypto.randomBytes(16).toString('base64'),
+            timestamp:Date.now()
+          };  
+          let  str1= [contents.deviceName,contents.nonce,contents.productId,contents.timestamp].sort().join('');
+          let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
+          var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
+          var Contentstr = crypto.createHmac('sha1', app_secret).update(str2).digest('hex'); 
         });
+
+        var options = {
+          host:'ap-guangzhou.gateway.tencentdevices.com',
+          path:'/register/dev',
+          method:'POST',
+          headers:{
+              'Content-Type':'application/x-www-form-urlencoded',
+              'Content-Length':contents.length
+          }
+        };
+
+        var req = http.request(options, function(res){
+          res.setEncoding('utf8');
+          res.on('data',function(data){
+              console.log("data:",data);   //一段html代码
+          });
+        });
+
+        req.write(Contentstr);
+        req.end;
       };
    
     

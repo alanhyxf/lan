@@ -47,7 +47,7 @@ module.exports = function (app) {
             return err.errors; 
           }
         });
-        models.Device.create(deviceInfo).then(function (device, err) {
+        model.Device.create(deviceInfo).then(function (device, err) {
           var http = require('http');
           var querystring = require('querystring');
          // var contents = querystring.stringify({
@@ -60,7 +60,8 @@ module.exports = function (app) {
           let  str1= [contents.deviceName,contents.nonce,contents.productId,contents.timestamp].sort().join('');
           let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
           var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
-          var Contentstr = crypto.createHmac('sha1', app_secret).update(str2).digest('hex'); 
+          contents["signature"] = crypto.createHmac('sha1', app_secret).update(str2).digest('hex').toString('base64'); 
+           
         });
 
         var options = {
@@ -69,7 +70,7 @@ module.exports = function (app) {
           method:'POST',
           headers:{
               'Content-Type':'application/x-www-form-urlencoded',
-              'Content-Length':contents.length
+              'Content-Length':Contents.length
           }
         };
 
@@ -80,7 +81,7 @@ module.exports = function (app) {
           });
         });
 
-        req.write(Contentstr);
+        req.write(Contents);
         req.end;
       };
    

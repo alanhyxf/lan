@@ -23,7 +23,10 @@ module.exports = function (app) {
     var ConvertMqtt= function(msg) {
 
       var DeviceInfo = {
-        device_id: msg.device_id;
+        device_id: msg.device_id,
+        signal:msg.signal,
+        battery:msg.battery,
+        firmware_version:msg.firmware_version       
 
       };
 

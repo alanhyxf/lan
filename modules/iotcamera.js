@@ -4,6 +4,8 @@ var db = new Database();
 var deviceCheck = require('../auth/deviceCheck');
 //var getAuthInfo = require('./utils/getAuth');
 var mqtt = require("mqtt");
+var model = require('../models');
+
 
 
 module.exports = function (app) {

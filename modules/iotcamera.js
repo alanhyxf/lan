@@ -6,7 +6,7 @@ var deviceCheck = require('../auth/deviceCheck');
 var mqtt = require("mqtt");
 var model = require('../models');
 const crypto = require('crypto');
-
+var format = require('string-format');
 
 module.exports = function (app) {
   'use strict';
@@ -54,16 +54,21 @@ module.exports = function (app) {
           var http = require('http');
           var querystring = require('querystring');
           var contents = {
-            productId:'EG3DYFIS5P',
+            productId:"EG3DYFIS5P",
             deviceName:device.device_id,
-            nonce:crypto.randomBytes(16).toString('base64'),
+            nonce:parseInt(Math.random()*10000+1,10),
             timestamp:Date.now()
           };  
-          let  str1= [contents.deviceName,contents.nonce,contents.productId,contents.timestamp].sort().join('');
-          let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
-          var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
-          contents["signature"] = crypto.createHmac('sha1', app_secret).update(str2).digest('hex').toString('base64'); 
+          //按字典排序生成str1
+          //let  str1= [contents.deviceName,contents.nonce,contents.productId,contents.timestamp].sort().join('');
+          
+          //let  str2= 'productId=\''+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
+          
+          let str2= 'deviceName={1}&nonce={2}&productId={3}&timestap={4}'.format(contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
+          var product_secret='T4VREgDOMYC1y6KsqyJhtr9t';
+          contents["signature"] = crypto.createHmac('sha1', product_secret).update(str2).digest('hex').toString('base64'); 
           var contentstr = querystring.stringify(contents); 
+          console.log('post string:'+contentstr);
 
           var options = {
             host:'ap-guangzhou.gateway.tencentdevices.com',
@@ -71,7 +76,8 @@ module.exports = function (app) {
             method:'POST',
             headers:{
                 'Content-Type':'application/x-www-form-urlencoded',
-                'Content-Length':contentstr.length
+                'Content-Length':contentstr.length,
+                'Header':'Accept: text/xml,application/json;*/*'
             }
           };
           
@@ -82,7 +88,7 @@ module.exports = function (app) {
             });
           });
   
-          req.write(contents);
+          req.write(contentstr);
           req.end;
 
 

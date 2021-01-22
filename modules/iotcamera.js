@@ -7,6 +7,8 @@ var mqtt = require("mqtt");
 var model = require('../models');
 const crypto = require('crypto');
 const util = require('util');
+var HmacSha1 = require('crypto-js/hmac-sha1') ;
+var Base64 = require('crypto-js/enc-base64');
 
 module.exports = function (app) {
   'use strict';
@@ -56,9 +58,9 @@ module.exports = function (app) {
           var contents = {
             productId:"EG3DYFIS5P",
             deviceName:device.device_id,
-            //nonce:crypto.randomBytes(16).toString('base64'),
+           
             nonce: parseInt(Math.random()*1000000000+1,10),
-            timestamp:Date.now().substr(0,10)
+            timestamp:parseInt(Date.now()/1000)
           };  
           
           //let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
@@ -67,14 +69,14 @@ module.exports = function (app) {
           console.log("str1:"+str1);
 
           var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
-          var sign = crypto.createHmac('sha1', app_secret).update(str1).digest('hex').toString('base64'); 
+          var sign = Base64.stringify((HmacSha1(str1,app_secret)));
           
           var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
-          var str2=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
+          var str2=util.format(str2format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
           console.log("str2:"+str2);
 
           var options = {
-            host:'https://ap-guangzhou.gateway.tencentdevices.com',
+            host:'ap-guangzhou.gateway.tencentdevices.com',
             path:'/register/dev',
             method:'POST',
             headers:{
@@ -90,7 +92,7 @@ module.exports = function (app) {
             });
           });
   
-          req.write(contentstr);
+          req.write(str2);
           req.end;
 
 

@@ -6,7 +6,7 @@ var deviceCheck = require('../auth/deviceCheck');
 var mqtt = require("mqtt");
 var model = require('../models');
 const crypto = require('crypto');
-
+const util = require('util');
 
 module.exports = function (app) {
   'use strict';
@@ -56,22 +56,30 @@ module.exports = function (app) {
           var contents = {
             productId:'EG3DYFIS5P',
             deviceName:device.device_id,
-            nonce:crypto.randomBytes(16).toString('base64'),
-            timestamp:Date.now()
+            //nonce:crypto.randomBytes(16).toString('base64'),
+            nonce: parseInt(Math.random()*1000000000+1,10),
+            timestamp:Date.now().substr(0,10)
           };  
-          let  str1= [contents.deviceName,contents.nonce,contents.productId,contents.timestamp].sort().join('');
-          let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
+          
+          //let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
+          var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
+          var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
+          console.log("str1:"+str1);
+
           var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
-          contents["signature"] = crypto.createHmac('sha1', app_secret).update(str2).digest('hex').toString('base64'); 
-          var contentstr = querystring.stringify(contents); 
+          var sign = crypto.createHmac('sha1', app_secret).update(str1).digest('hex').toString('base64'); 
+          
+          var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
+          var str2=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
+          console.log("str2:"+str2);
 
           var options = {
-            host:'ap-guangzhou.gateway.tencentdevices.com',
+            host:'https://ap-guangzhou.gateway.tencentdevices.com',
             path:'/register/dev',
             method:'POST',
             headers:{
                 'Content-Type':'application/x-www-form-urlencoded',
-                'Content-Length':contentstr.length
+                'Content-Length':str2.length
             }
           };
           

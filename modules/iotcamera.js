@@ -54,7 +54,7 @@ module.exports = function (app) {
           var http = require('http');
           var querystring = require('querystring');
           var contents = {
-            productId:'EG3DYFIS5P',
+            productId:"EG3DYFIS5P",
             deviceName:device.device_id,
             //nonce:crypto.randomBytes(16).toString('base64'),
             nonce: parseInt(Math.random()*1000000000+1,10),
@@ -90,7 +90,7 @@ module.exports = function (app) {
             });
           });
   
-          req.write(contents);
+          req.write(contentstr);
           req.end;
 
 

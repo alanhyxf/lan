@@ -5,76 +5,75 @@ var deviceCheck = require('../auth/deviceCheck');
 //var getAuthInfo = require('./utils/getAuth');
 var mqtt = require("mqtt");
 var model = require('../models');
-const crypto = require('crypto');
-const util = require('util');
-var HmacSha1 = require('crypto-js/hmac-sha1') ;
-var Base64 = require('crypto-js/enc-base64');
+var crypto = require('crypto');
+var util = require('util');
+//var HmacSha1 = require('crypto-js/hmac-sha1') ;
+//var Base64 = require('crypto-js/enc-base64');
+var hash, hmac;
+
 
 module.exports = function (app) {
   'use strict';
   return function (client_sock) {
 
 
-    console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
-    // 设置你接受的格式, 
+    //console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
+    // 设置可接受的格式,  hex为二进制的文本编码
     client_sock.setEncoding("utf8");
-    // client_sock.setEncoding("hex"); // 转成二进制的文本编码
+    
     // 客户端断开连接的时候处理,用户断线离开了
     client_sock.on("close", function() {
       console.log("close socket");
     });
    
-    var ConvertMqtt= function(msg) {
+    var ConvertMqtt= function(msg_type,DeviceInfo) { 
 
-      var DeviceInfo = {
-        device_id: msg.device_id,
-        signal:msg.signal,
-        battery:msg.battery,
-        firmware_version:msg.firmware_version       
+        //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
+      var client  = mqtt.connect('mqtt://EG3DYFIS5P.iotcloud.tencentdevices.com',{
+        username:'EG3DYFIS5Pdev202101;12010126;8VMXV;1611493674',
+        password:'41c3c61ce8c38833bb8d8defb17b1a0394f22903104236aa0c368ce07e41300a;hmacsha256',
+        clientId:DeviceInfo.device_id
+      });
 
-      };
+      if (msg_type==1){
+        client.publish('EG3DYFIS5P/dev202101/event', msg);
+        client.end();
+        client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+   
 
-      var oldDevice = function (deviceInfo) {
-      //已经注册过的设备
-        console.log("Device Exist："+deviceInfo.device_id);
-      };
-    
-      var newDevice = function (deviceInfo) {
-        //新注册设备  
-        console.log("Device New:"+deviceInfo.device_id);
-        model.Device.build(deviceInfo)
-          .validate()
-          .then(function (err) {
-          if (err) {
-            return err.errors; 
-          }
-        });
+      };  
+      if (msg_type==3){
 
-        
+      }; 
+      if (msg_type==5){
 
-        model.Device.create(deviceInfo).then(function (device, err) {
+      }; 
+      if (msg_type==7){
+
+      }; 
+      if (msg_type==51){
+
+      }; 
+
+
+      if (msg_type==99){
+        model.Device.create(deviceobj).then(function (device, err) {
           var http = require('http');
           var querystring = require('querystring');
           var contents = {
             productId:"EG3DYFIS5P",
-            deviceName:device.device_id,
-           
-            nonce: parseInt(Math.random()*1000000000+1,10),
+            deviceName:deviceInfo.device_id,
+            nonce: parseInt(Date.now()/1000),
             timestamp:parseInt(Date.now()/1000)
           };  
           
-          //let  str2= 'productId='+contents.productId+'&'+'deviceName='+contents.deviceName+'&'+'nonce='+contents.nonce+'&'+'timestamp='+contents.timestamp+'&'+'signature='+str1;
           var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
           var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
-          console.log("str1:"+str1);
-
           var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
-          var sign = Base64.stringify((HmacSha1(str1,app_secret)));
-          
+          var sha1=crypto.createHmac('sha1', app_secret).update(str1).digest('HEX');
+          var sign=new Buffer(sha1).toString('base64');
           var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
           var str2=util.format(str2format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
-          console.log("str2:"+str2);
-
           var options = {
             host:'ap-guangzhou.gateway.tencentdevices.com',
             path:'/register/dev',
@@ -83,76 +82,73 @@ module.exports = function (app) {
                 'Content-Type':'application/x-www-form-urlencoded',
                 'Content-Length':str2.length
             }
-          };
-          
+          };          
           var req = http.request(options, function(res){
             res.setEncoding('utf8');
             res.on('data',function(data){
-                console.log("data:",data);   //一段html代码
+                console.log("data:",data);   //返回值
             });
-          });
-  
+          });  
           req.write(str2);
-          req.end;
-
-
-                     
+          req.end;                     
         });
+      }; 
 
-        
-
-        
-      };
-   
-    
-      deviceCheck(DeviceInfo, oldDevice, newDevice);
-
-      var client  = mqtt.connect('mqtt://EG3DYFIS5P.iotcloud.tencentdevices.com',{
-        username:'EG3DYFIS5Pdev202101;12010126;8VMXV;1611493674',
-        password:'41c3c61ce8c38833bb8d8defb17b1a0394f22903104236aa0c368ce07e41300a;hmacsha256',
-        clientId:DeviceInfo.device_id
-      });
-
-       client.publish('EG3DYFIS5P/dev202101/event', msg);
-       client.end();
-    }
-    // 接收到客户端的数据，调用这个函数
-    // data 默认是Buffer对象，如果你强制设置为utf8,那么底层会先转换成utf8的字符串，传给你
-    // hex 底层会把这个Buffer对象转成二进制字符串传给你
-    // 如果你没有设置任何编码 <Buffer 48 65 6c 6c 6f 57 6f 72 6c 64 21>
-    // utf8 --> HelloWorld!!!   hex--> "48656c6c6f576f726c6421"
-    client_sock.on("data", function(data) {
-      console.log("Incoming IOTCamera Data");
-      if ((data.indexOf("C28C0DB26D39331A")!=-1) && (data.indexOf("15B86F2D013B2618")!=-1))
-      {
-        let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
-        console.log("IOTCamera Data Type:"+dataobj.msg_type);
-
-        /*
-        var payload = {
-          name: dataobj.device_id,
-          token: dataobj.timestamp,
-          data: data.slice(data.indexOf("{"),data.indexOf("}")+1)
-        };
-        db.insert(payload);
-        */
-
-        if(dataobj.msg_type==1)
-        {
-          client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
-          var msg = {
-            msg_type:2,
-            device_id: dataobj.device_id,
-            signal:dataobj.signal,
-            battery:dataobj.battery,
-            firmware_version:dataobj.firmware_version,
-            timestamp: parseInt(+new Date()/1000)
-          };       
-          ConvertMqtt(msg);
-        }
-      };
       
-   
+    };
+
+
+    // 接收到客户端的数据，调用这个函数
+    client_sock.on("data", function(data) {
+      //如果不是合法的数据包，直接关闭连接。
+      if ((data.indexOf("C28C0DB26D39331A")=-1) || (data.indexOf("15B86F2D013B2618")=-1)){
+         client_sock.end(); 
+      }
+      //console.log("Incoming IOTCamera Data");      
+      let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
+      console.log("IOTCamera Data Type:"+dataobj.msg_type);
+
+      //数据包保存到mongo里
+      var payload = {
+        name: dataobj.device_id,
+        token: dataobj.timestamp,
+        data: data.slice(data.indexOf("{"),data.indexOf("}")+1)
+      };
+      db.insert(payload);
+      
+
+      var DeviceInfo = {
+        device_id: msg.device_id,
+        signal:msg.signal,
+        battery:msg.battery,
+        firmware_version:msg.firmware_version,
+        product_id:'',
+        product_secret:'',
+        device_name:'',
+        device_secret:'',
+        client_id:'',
+        status:''
+      };
+
+
+
+      //将来升级为注册指令，可以转换为msg_type处理。
+       //已经注册过的设备
+      var oldDevice = function (DeviceInfo) {
+          console.log("Device Exist："+DeviceInfo.device_id);
+          //然后根据数据包类型进行转换 msg_type： 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply
+          ConvertMqtt(msg_type,DeviceInfo);
+      };
+
+      var newDevice = function (DeviceInfo) {
+        //新注册设备  转发MQTT注册指令
+        console.log("Device New:"+DeviceInfo.device_id);
+        ConvertMqtt(99,DeviceInfo);
+        ConvertMqtt(msg_type,DeviceInfo);
+      };  
+
+      deviceCheck(DeviceInfo.device_id, oldDevice, newDevice);
+
       //client_sock.end(); // 正常关闭
     });
    

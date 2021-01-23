@@ -1,13 +1,13 @@
 var model = require('../models');
 
 
-module.exports = function (deviceInfo, oldDevice, newDevice) {
+module.exports = function (DeviceInfo, oldDevice, newDevice) {
   'use strict';
-  model.Device.findOne({where: {device_id: deviceInfo.device_id}}).then(function (device) {
+  model.Device.findOne({where: {device_id: DeviceInfo.device_id}}).then(function (device) {
     if (!device) {
-      return newDevice(deviceInfo);
+      return newDevice(DeviceInfo);
     } else {
-      return oldDevice(deviceInfo);
+      return oldDevice(DeviceInfo);
     }
  
   });

@@ -35,9 +35,15 @@ module.exports = function (sequelize, DataTypes) {
       }
     },
     
-    signal: DataTypes.STRING,
-    firmware_version: DataTypes.STRING,
-    battery: DataTypes.STRING
+    //signal: DataTypes.STRING,
+    //firmware_version: DataTypes.STRING,
+    //battery: DataTypes.STRING
+    product_id:DataTypes.STRING,
+    product_secret:DataTypes.STRING,
+    device_name:DataTypes.STRING,
+    device_secret:DataTypes.STRING,
+    client_id:DataTypes.STRING,
+    status:DataTypes.INTEGER
   }, {
     classMethods: {
       associate: function (models) {

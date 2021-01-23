@@ -2,6 +2,28 @@ var Database = require('../persistence/mongo');
 var db = new Database();
 var authCheck = require('../auth/basic');
 
+
+    /*  反馈代码
+    client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+    var msg = {
+      msg_type:2,
+      device_id: dataobj.device_id,
+      signal:dataobj.signal,
+      battery:dataobj.battery,
+      firmware_version:dataobj.firmware_version,
+      timestamp: parseInt(+new Date()/1000)
+    };      
+    */ 
+
+            /*
+        model.Device.build(deviceInfo)
+          .validate()
+          .then(function (err) {
+          if (err) {
+            return err.errors; 
+          }
+        });
+        */
 module.exports = function (app) {
   'use strict';
   return function (client) {

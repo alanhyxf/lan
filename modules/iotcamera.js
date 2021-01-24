@@ -143,8 +143,9 @@ module.exports = function (app) {
     // 接收到客户端的数据，调用这个函数
     client_sock.on("data", function(data) {
       //如果不是合法的数据包，直接关闭连接。
-      if ((data.indexOf("C28C0DB26D39331A")=-1) || (data.indexOf("15B86F2D013B2618")=-1)){
-         client_sock.end(); 
+      if ((data.indexOf("C28C0DB26D39331A")==-1) || (data.indexOf("15B86F2D013B2618")==-1)){
+         return client_sock.end(); 
+         
       };
       //console.log("Incoming IOTCamera Data");      
       let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));

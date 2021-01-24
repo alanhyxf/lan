@@ -35,10 +35,10 @@ function getSign(DeviceInfo) {
   var password = '';
 
   if (signmethod === 'HMAC-SHA1') {
-      token = CryptoJS.HmacSHA1(username, CryptoJS.enc.Base64.parse(devicesecret))
-      password = token + ';' + 'hmacsha1'
+    token=crypto.createHmac('sha1', devicesecret.toString('base64')).update(username).digest('HEX');
+    password = token + ';' + 'hmacsha1'
   } else {
-      token = CryptoJS.HmacSHA256(username, CryptoJS.enc.Base64.parse(devicesecret))
+      token=crypto.createHmac('sha256', devicesecret.toString('base64')).update(username).digest('HEX');
       password = token + ';' + 'hmacsha256'
   }
 
@@ -161,10 +161,10 @@ module.exports = function (app) {
       
 
       var DeviceInfo = {
-        device_id: msg.device_id,
-        signal:msg.signal,
-        battery:msg.battery,
-        firmware_version:msg.firmware_version,
+        device_id: dataobj.device_id,
+        signal:dataobj.signal,
+        battery:dataobj.battery,
+        firmware_version:dataobj.firmware_version,
         product_id:'',
         product_secret:'',
         device_name:'',
@@ -190,7 +190,7 @@ module.exports = function (app) {
         ConvertMqtt(msg_type,DeviceInfo);
       };  
 
-      deviceCheck(DeviceInfo.device_id, oldDevice, newDevice);
+      deviceCheck(DeviceInfo, oldDevice, newDevice);
 
       //client_sock.end(); // 正常关闭
     });

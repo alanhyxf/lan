@@ -22,31 +22,31 @@ function randomString(len, charSet) {
 }
 
 function getSign(DeviceInfo) {
-  var productid = DeviceInfo.product_id;
-  var devicename = DeviceInfo.deviceName;
-  var devicesecret = DeviceInfo.device_secret;
+  var product_id = DeviceInfo.product_id;
+  var device_name = DeviceInfo.device_name;
+  var device_secret = DeviceInfo.device_secret;
   var signmethod = 'HMAC-SHA256';
   
   var connid = randomString(5);
   var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
-  var clientid = productid + devicename;
-  var username = clientid + ';' + '12010126' + ';' + connid + ';' + expiry;
+  var client_id = product_id + device_name;
+  var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
   var token = '';
   var password = '';
 
   if (signmethod === 'HMAC-SHA1') {
-    token=crypto.createHmac('sha1', devicesecret.toString('base64')).update(username).digest('HEX');
+    token=crypto.createHmac('sha1', device_secret.toString('base64')).update(username).digest('HEX');
     password = token + ';' + 'hmacsha1'
   } else {
-      token=crypto.createHmac('sha256', devicesecret.toString('base64')).update(username).digest('HEX');
+      token=crypto.createHmac('sha256', device_secret.toString('base64')).update(username).digest('HEX');
       password = token + ';' + 'hmacsha256'
   }
 
   return  {
-    url:productid+'.iotcloud.tencentdevices.com',
+    url:product_id+'.iotcloud.tencentdevices.com',
     username:username,
     password:password,
-    clientid:clientid
+    client_id:client_id
   };
 
 }

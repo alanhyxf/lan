@@ -7,8 +7,8 @@ var mqtt = require("mqtt");
 var model = require('../models');
 var crypto = require('crypto');
 var util = require('util');
-//var HmacSha1 = require('crypto-js/hmac-sha1') ;
-//var Base64 = require('crypto-js/enc-base64');
+var cryptojs = require('crypto-js') ;
+
 var hash, hmac;
 
 function randomString(len, charSet) {
@@ -35,10 +35,11 @@ function getSign(DeviceInfo) {
   var password = '';
 
   if (signmethod === 'HMAC-SHA1') {
-    token=crypto.createHmac('sha1', device_secret.toString('base64')).update(username).digest('HEX');
+     token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
     password = token + ';' + 'hmacsha1'
   } else {
-      token=crypto.createHmac('sha256', device_secret.toString('base64')).update(username).digest('HEX');
+     
+      token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
       password = token + ';' + 'hmacsha256'
   }
 

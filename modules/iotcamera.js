@@ -70,7 +70,7 @@ module.exports = function (app) {
 
       var MqttOption =getSign(DeviceInfo);
 
-      console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
+      //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
         //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
       var client  = mqtt.connect(MqttOption.url,{
         username:MqttOption.username,
@@ -78,8 +78,8 @@ module.exports = function (app) {
         clientId:MqttOption.clientid
       });
 
-      if (msg_type==1){
-        client.publish(DeviceInfo.product_id+'/'+DeviceInfo.deviceName+'/event', msg_type);
+      if (msg_type==1){    $thing/up/property/EG3DYFIS5P/356802050143980
+        client.publish('$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.deviceName, 'dd');
         client.end();
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
    

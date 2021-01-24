@@ -43,7 +43,7 @@ function getSign(DeviceInfo) {
   }
 
   return  {
-    url:product_id+'.iotcloud.tencentdevices.com',
+    url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
     username:username,
     password:password,
     client_id:client_id

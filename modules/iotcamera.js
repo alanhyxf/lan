@@ -11,6 +11,45 @@ var util = require('util');
 //var Base64 = require('crypto-js/enc-base64');
 var hash, hmac;
 
+function randomString(len, charSet) {
+  charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var randomString = '';
+  for (var i = 0; i < len; i++) {
+      var randomPoz = Math.floor(Math.random() * charSet.length);
+      randomString += charSet.substring(randomPoz, randomPoz + 1);
+  }
+  return randomString;
+}
+
+function getSign(DeviceInfo) {
+  var productid = DeviceInfo.product_id;
+  var devicename = DeviceInfo.deviceName;
+  var devicesecret = DeviceInfo.device_secret;
+  var signmethod = 'HMAC-SHA256';
+  
+  var connid = randomString(5);
+  var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
+  var clientid = productid + devicename;
+  var username = clientid + ';' + '12010126' + ';' + connid + ';' + expiry;
+  var token = '';
+  var password = '';
+
+  if (signmethod === 'HMAC-SHA1') {
+      token = CryptoJS.HmacSHA1(username, CryptoJS.enc.Base64.parse(devicesecret))
+      password = token + ';' + 'hmacsha1'
+  } else {
+      token = CryptoJS.HmacSHA256(username, CryptoJS.enc.Base64.parse(devicesecret))
+      password = token + ';' + 'hmacsha256'
+  }
+
+  return  {
+    url:productid+'.iotcloud.tencentdevices.com',
+    username:username,
+    password:password,
+    clientid:clientid
+  };
+
+}
 
 module.exports = function (app) {
   'use strict';
@@ -28,15 +67,18 @@ module.exports = function (app) {
    
     var ConvertMqtt= function(msg_type,DeviceInfo) { 
 
+      var Mqttoption =getSign(DeviceInfo);
+
+      
         //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
-      var client  = mqtt.connect('mqtt://EG3DYFIS5P.iotcloud.tencentdevices.com',{
-        username:'EG3DYFIS5Pdev202101;12010126;8VMXV;1611493674',
-        password:'41c3c61ce8c38833bb8d8defb17b1a0394f22903104236aa0c368ce07e41300a;hmacsha256',
-        clientId:DeviceInfo.device_id
+      var client  = mqtt.connect(MqttOption.url,{
+        username:MqttOption.username,
+        password:MqttOption.password,
+        clientId:MqttOption.clientid
       });
 
       if (msg_type==1){
-        client.publish('EG3DYFIS5P/dev202101/event', msg);
+        client.publish(DeviceInfo.product_id+'/'+DeviceInfo.deviceName+'/event', msg_type);
         client.end();
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
    
@@ -62,7 +104,7 @@ module.exports = function (app) {
           var querystring = require('querystring');
           var contents = {
             productId:"EG3DYFIS5P",
-            deviceName:deviceInfo.device_id,
+            deviceName:DeviceInfo.device_id,
             nonce: parseInt(Date.now()/1000),
             timestamp:parseInt(Date.now()/1000)
           };  
@@ -103,7 +145,7 @@ module.exports = function (app) {
       //如果不是合法的数据包，直接关闭连接。
       if ((data.indexOf("C28C0DB26D39331A")=-1) || (data.indexOf("15B86F2D013B2618")=-1)){
          client_sock.end(); 
-      }
+      };
       //console.log("Incoming IOTCamera Data");      
       let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
       console.log("IOTCamera Data Type:"+dataobj.msg_type);

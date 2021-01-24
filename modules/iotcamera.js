@@ -76,16 +76,31 @@ module.exports = function (app) {
         clientId:MqttOption.clientid
       });
 
-      if (msg_type==1){   
-        var topic1='$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        var topicReport='{ "method": "report", "params": { "Status": 1 }}'
-        console.log(topic1);
-        client.publish(topic1, topicReport);
-        client.end();
-        client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
-   
+      var topic='';
+      var topicInfo='';
 
+
+
+      client.on('connect', function () {
+        console.log('connected.....');
+        topic= DeviceInfo.product_id+'/'+DeviceInfo.device_name+'/control';
+        client.subscribe(topic);
+    //    topic='$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+    //    topicInfo='{ "method": "report", "params": { "Status": 1 }}'
+    //    client.publish(topic, topicInfo);
+      });
+ 
+      client.on('message', function (topic, message) {
+        // message is Buffer
+        console.log(topic+':'+message.toString());
+        //client.end();
+      });
+
+      //如果是心跳包，直接返回心跳reply
+      if (msg_type==1){   
+        client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
       };  
+      //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
       if (msg_type==3){
 
       }; 

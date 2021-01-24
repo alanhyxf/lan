@@ -78,8 +78,10 @@ module.exports = function (app) {
         clientId:MqttOption.clientid
       });
 
-      if (msg_type==1){    $thing/up/property/EG3DYFIS5P/356802050143980
-        client.publish('$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.deviceName, 'dd');
+      if (msg_type==1){   
+        var topic1='$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.deviceName;
+        console.log(topic1);
+        client.publish(topic1, 'dd');
         client.end();
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
    

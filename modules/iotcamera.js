@@ -69,7 +69,7 @@ module.exports = function (app) {
 
       var MqttOption =getSign(DeviceInfo);
 
-      console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.clientid);
+      console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
         //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
       var client  = mqtt.connect(MqttOption.url,{
         username:MqttOption.username,

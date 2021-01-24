@@ -55,8 +55,6 @@ function getSign(DeviceInfo) {
 module.exports = function (app) {
   'use strict';
   return function (client_sock) {
-
-
     //console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
     // 设置可接受的格式,  hex为二进制的文本编码
     client_sock.setEncoding("utf8");
@@ -79,9 +77,10 @@ module.exports = function (app) {
       });
 
       if (msg_type==1){   
-        var topic1='$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.deviceName;
+        var topic1='$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        var topicReport='{ "method": "report", "params": { "Status": 1 }}'
         console.log(topic1);
-        client.publish(topic1, 'dd');
+        client.publish(topic1, topicReport);
         client.end();
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
    

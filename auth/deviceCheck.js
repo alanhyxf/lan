@@ -8,7 +8,7 @@ module.exports = function (DeviceInfo, oldDevice, newDevice) {
 
       return newDevice(DeviceInfo);
     } else {
-
+      console.log('device info'+device.product_id);
       DeviceInfo.product_id=device.product_id;
       DeviceInfo.product_secret=device.product_secret;
       DeviceInfo.device_name=device.device_name;

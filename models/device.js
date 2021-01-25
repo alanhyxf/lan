@@ -43,7 +43,7 @@ module.exports = function (sequelize, DataTypes) {
     device_name:DataTypes.STRING,
     device_secret:DataTypes.STRING,
     client_id:DataTypes.STRING,
-    status:DataTypes.INTEGER
+    status:DataTypes.STRING
   }, {
     classMethods: {
       associate: function (models) {

@@ -79,15 +79,16 @@ module.exports = function (app) {
       var topic='';
       var topicInfo='';
 
+      topic='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+      client.subscribe(topic);	
+
+      
+
 
 
       client.on('connect', function () {
-        console.log('connected.....');
-        topic= DeviceInfo.product_id+'/'+DeviceInfo.device_name+'/control';
-        client.subscribe(topic);
-    //    topic='$thing/up/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    //    topicInfo='{ "method": "report", "params": { "Status": 1 }}'
-    //    client.publish(topic, topicInfo);
+        console.log('MQTT connected.....');
+
       });
  
       client.on('message', function (topic, message) {
@@ -101,26 +102,32 @@ module.exports = function (app) {
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
       };  
       //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
-      if (msg_type==3){
-
+      if (msg_type==3){       
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"err":DeviceInfo.status}};
+        client.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==5){
-
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"err":DeviceInfo.status}};
+        client.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==7){
-
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"err":DeviceInfo.status}};
+        client.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==51){
-
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"err":DeviceInfo.status}};
+        client.publish(topic, JSON.stringify(topicInfo));
       }; 
-
-
       if (msg_type==99){
         model.Device.create(deviceobj).then(function (device, err) {
           var http = require('http');
           var querystring = require('querystring');
           var contents = {
-            productId:"EG3DYFIS5P",
+            productId:DeviceInfo.product_id,
             deviceName:DeviceInfo.device_id,
             nonce: parseInt(Date.now()/1000),
             timestamp:parseInt(Date.now()/1000)
@@ -128,7 +135,7 @@ module.exports = function (app) {
           
           var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
           var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
-          var app_secret='T4VREgDOMYC1y6KsqyJhtr9t';
+          var app_secret=DeviceInfo.device_secret;
           var sha1=crypto.createHmac('sha1', app_secret).update(str1).digest('HEX');
           var sign=new Buffer(sha1).toString('base64');
           var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
@@ -152,6 +159,7 @@ module.exports = function (app) {
           req.end;                     
         });
       }; 
+      client.end();
 
       
     };

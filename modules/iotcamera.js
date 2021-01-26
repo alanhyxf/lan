@@ -26,123 +26,7 @@ var DeviceInfo = {
 
 
 
-function InitMqtt(DeviceInfo,client_sock){
-  if(!MqttClient){
-    var MqttOption =getSign(DeviceInfo);
 
-    //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
-      //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
-      MqttClient= mqtt.connect(MqttOption.url,{
-      username:MqttOption.username,
-      password:MqttOption.password,
-      clientId:MqttOption.clientid
-    });
-
-    MqttClient.on('message', function (topic, message) {
-      // message is Buffer
-      console.log(topic+':'+message.toString());
-      //client.end();
-      //message:{"method":"action","clientToken":"1ea48e5644ce4582b1558b8e8926e3e6","actionId":"CAM","timestamp":1611666092,"params":{"action":0,"http_url":"www","count":1}}
-      //var TopicObj=JSON.parse(topic);
-      var IOTObj=JSON.parse(message);
-      if(IOTObj.method=="action"){
-           //拍照指令
-          if(IOTObj.actionId=="CAM"){  
-            client_sock.write("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":"+parseInt(+new Date()/1000)+",\"action\":"+IOTObj.params.action+",\"http_url\":\""+IOTObj.params.http_url+"\",\"count:\""+IOTObj.params.count+"}15B86F2D013B2618");
-          };
-          if(IOTObj.actionId=="CONFIG"){  
-            var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":%s,\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.inteval);
-            client_sock.write(sformat);
-          };
-          if(IOTObj.actionId=="Reboot"){  
-            var sformat=util.format("C28C0DB26D39331A{\"msg_type\":50,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
-            client_sock.write(sformat);
-          };
-      };
-    });
-
-    MqttClient.on('connect', function (topic, message) {
-      // message is Buffer
-      console.log(topic+':'+message.toString());
-      //client.end();
-      var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-      var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-      MqttClient.subscribe(topic1);	
-      MqttClient.subscribe(topic2);	
-    });
-
-  };
-
-  
-}
-
-function ConvertMqtt(msg_type,DeviceInfo,client_sock) { 
-
-  InitMqtt(DeviceInfo,client_sock);
-  //如果是心跳包，直接返回心跳reply
-  if (msg_type==1){   
-    client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
-  };  
-  //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
-  if (msg_type==3){       
-    topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"err":DeviceInfo.status}};
-    MqttClient.publish(topic, JSON.stringify(topicInfo));
-  }; 
-  if (msg_type==5){
-    topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"err":DeviceInfo.status}};
-    MqttClient.publish(topic, JSON.stringify(topicInfo));
-  }; 
-  if (msg_type==7){
-    topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"err":DeviceInfo.status}};
-    MqttClient.publish(topic, JSON.stringify(topicInfo));
-  }; 
-  if (msg_type==51){
-    topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"err":DeviceInfo.status}};
-    MqttClient.publish(topic, JSON.stringify(topicInfo));
-  }; 
-  if (msg_type==99){
-    model.Device.create(deviceobj).then(function (device, err) {
-      var http = require('http');
-      var querystring = require('querystring');
-      var contents = {
-        productId:DeviceInfo.product_id,
-        deviceName:DeviceInfo.device_id,
-        nonce: parseInt(Date.now()/1000),
-        timestamp:parseInt(Date.now()/1000)
-      };  
-      
-      var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
-      var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
-      var app_secret=DeviceInfo.device_secret;
-      var sha1=crypto.createHmac('sha1', app_secret).update(str1).digest('HEX');
-      var sign=new Buffer(sha1).toString('base64');
-      var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
-      var str2=util.format(str2format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
-      var options = {
-        host:'ap-guangzhou.gateway.tencentdevices.com',
-        path:'/register/dev',
-        method:'POST',
-        headers:{
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Content-Length':str2.length
-        }
-      };          
-      var req = http.request(options, function(res){
-        res.setEncoding('utf8');
-        res.on('data',function(data){
-            console.log("data:",data);   //返回值
-        });
-      });  
-      req.write(str2);
-      req.end;                     
-    });
-  }; 
-  //client.end();    
-}
 
 function randomString(len, charSet) {
   charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -196,6 +80,122 @@ module.exports = function (app) {
     client_sock.on("close", function() {
       console.log("close socket");
     });
+
+    
+    function InitMqtt(DeviceInfo){
+      if(!MqttClient){
+        var MqttOption =getSign(DeviceInfo);
+
+        //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
+          //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
+          MqttClient= mqtt.connect(MqttOption.url,{
+          username:MqttOption.username,
+          password:MqttOption.password,
+          clientId:MqttOption.clientid
+        });
+
+        MqttClient.on('message', function (topic, message) {
+          // message is Buffer
+          console.log(topic+':'+message.toString());
+          //client.end();
+          //message:{"method":"action","clientToken":"1ea48e5644ce4582b1558b8e8926e3e6","actionId":"CAM","timestamp":1611666092,"params":{"action":0,"http_url":"www","count":1}}
+          //var TopicObj=JSON.parse(topic);
+          var IOTObj=JSON.parse(message);
+          if(IOTObj.method=="action"){
+              //拍照指令
+              if(IOTObj.actionId=="CAM"){  
+                client_sock.write("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":"+parseInt(+new Date()/1000)+",\"action\":"+IOTObj.params.action+",\"http_url\":\""+IOTObj.params.http_url+"\",\"count:\""+IOTObj.params.count+"}15B86F2D013B2618");
+              };
+              if(IOTObj.actionId=="CONFIG"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":%s,\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.inteval);
+                client_sock.write(sformat);
+              };
+              if(IOTObj.actionId=="Reboot"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":50,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
+                client_sock.write(sformat);
+              };
+          };
+        });
+
+        MqttClient.on('connect', function (topic, message) {
+          // message is Buffer
+          console.log(topic+':'+message.toString());
+          //client.end();
+          var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+          var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+          MqttClient.subscribe(topic1);	
+          MqttClient.subscribe(topic2);	
+        });
+      };
+    };
+
+    function ConvertMqtt(msg_type,DeviceInfo) { 
+
+      InitMqtt(DeviceInfo);
+      //如果是心跳包，直接返回心跳reply
+      if (msg_type==1){   
+        client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+      };  
+      //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
+      if (msg_type==3){       
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"err":DeviceInfo.status}};
+        MqttClient.publish(topic, JSON.stringify(topicInfo));
+      }; 
+      if (msg_type==5){
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"err":DeviceInfo.status}};
+        MqttClient.publish(topic, JSON.stringify(topicInfo));
+      }; 
+      if (msg_type==7){
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"err":DeviceInfo.status}};
+        MqttClient.publish(topic, JSON.stringify(topicInfo));
+      }; 
+      if (msg_type==51){
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"err":DeviceInfo.status}};
+        MqttClient.publish(topic, JSON.stringify(topicInfo));
+      }; 
+      if (msg_type==99){
+        model.Device.create(deviceobj).then(function (device, err) {
+          var http = require('http');
+          var querystring = require('querystring');
+          var contents = {
+            productId:DeviceInfo.product_id,
+            deviceName:DeviceInfo.device_id,
+            nonce: parseInt(Date.now()/1000),
+            timestamp:parseInt(Date.now()/1000)
+          };  
+          
+          var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
+          var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
+          var app_secret=DeviceInfo.device_secret;
+          var sha1=crypto.createHmac('sha1', app_secret).update(str1).digest('HEX');
+          var sign=new Buffer(sha1).toString('base64');
+          var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
+          var str2=util.format(str2format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
+          var options = {
+            host:'ap-guangzhou.gateway.tencentdevices.com',
+            path:'/register/dev',
+            method:'POST',
+            headers:{
+                'Content-Type':'application/x-www-form-urlencoded',
+                'Content-Length':str2.length
+            }
+          };          
+          var req = http.request(options, function(res){
+            res.setEncoding('utf8');
+            res.on('data',function(data){
+                console.log("data:",data);   //返回值
+            });
+          });  
+          req.write(str2);
+          req.end;                     
+        });
+      }; 
+      //client.end();    
+    };
     
  
 
@@ -238,7 +238,7 @@ module.exports = function (app) {
         //新注册设备  转发MQTT注册指令
         console.log("Device New:"+DeviceInfo.device_id);
         ConvertMqtt(99,DeviceInfo,client_sock);
-        ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
+        ConvertMqtt(dataobj.msg_type,DeviceInfo);
       };  
 
       deviceCheck(DeviceInfo, oldDevice, newDevice);

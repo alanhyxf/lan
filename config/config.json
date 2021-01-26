@@ -5,7 +5,7 @@
     "password": "Yxfhalan1",
     "database": "IOT",
     "host": "172.16.16.9",
-    "logging": true
+    "logging": false
   },
   "test": {
     "dialect": "sqlite",

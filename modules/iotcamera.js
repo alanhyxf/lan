@@ -25,7 +25,7 @@ var DeviceInfo = {
 };
 
 function InitMqtt(DeviceInfo){
-  if(!!MqttClient){
+  if(!MqttClient){
     var MqttOption =getSign(DeviceInfo);
 
     //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
@@ -46,11 +46,12 @@ function InitMqtt(DeviceInfo){
       // message is Buffer
       console.log(topic+':'+message.toString());
       //client.end();
-      var topic='';
-      var topicInfo='';
-
-      topic='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-      MqttClient.subscribe(topic);	
+      var topiclist=[];
+      topiclist.push('$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name);
+      topiclist.push('$thing/down/raw/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name);
+      topiclist.push(DeviceInfo.product_id+'/'+DeviceInfo.device_name+'/control');
+      topiclist.push(DeviceInfo.product_id+'/'+DeviceInfo.device_name+'/data');
+      MqttClient.subscribe(topiclist);	
     });
 
   };

@@ -104,12 +104,16 @@ module.exports = function (app) {
           if(IOTObj.method=="action"){
               //拍照指令
               if(IOTObj.actionId=="CAM"){  
-                client_sock.write("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":"+parseInt(+new Date()/1000)+",\"action\":"+IOTObj.params.action+",\"http_url\":\""+IOTObj.params.http_url+"\",\"count:\""+IOTObj.params.count+"}15B86F2D013B2618");
-              };
-              if(IOTObj.actionId=="CONFIG"){  
-                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":%s,\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.inteval);
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":%s,\"action\":%d,\"http_url\":\"%s\",\"count\":%d}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.action,IOTObj.params.http_url,IOTObj.params.count);
                 client_sock.write(sformat);
               };
+
+              //配置
+              if(IOTObj.actionId=="CONFIG"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":\"%s\",\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.opt,IOTObj.params.inteval);
+                client_sock.write(sformat);
+              };
+              //重启
               if(IOTObj.actionId=="Reboot"){  
                 var sformat=util.format("C28C0DB26D39331A{\"msg_type\":50,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
                 client_sock.write(sformat);

@@ -35,8 +35,11 @@ start = function (opts, callback) {
   }
 
   if (_.include(app.config.get('modules'), 'iotcamera')) {
-    net.createServer(app.iotcamera).listen(config.get('port.iotcamera'), function () {
+    var iotcareraserver=net.createServer(app.iotcamera).listen(config.get('port.iotcamera'), function () {
       console.log("iotcamera server listening on port %d", config.get('port.iotcamera'));
+    });
+    iotcareraserver.on("connection", function(client_sock) {
+      console.log("client comming 11");
     });
   }
 

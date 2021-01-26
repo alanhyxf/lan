@@ -55,7 +55,7 @@ function getSign(DeviceInfo) {
 module.exports = function (app) {
   'use strict';
   return function (client_sock) {
-    //console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
+    console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
     // 设置可接受的格式,  hex为二进制的文本编码
     client_sock.setEncoding("utf8");
     

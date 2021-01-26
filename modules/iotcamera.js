@@ -40,18 +40,33 @@ function InitMqtt(DeviceInfo){
       // message is Buffer
       console.log(topic+':'+message.toString());
       //client.end();
+      //message:{"method":"action","clientToken":"1ea48e5644ce4582b1558b8e8926e3e6","actionId":"CAM","timestamp":1611666092,"params":{"action":0,"http_url":"www","count":1}}
+      var TopicObj=JSON.parse(topic);
+      var IOTObj=JSON.parse(message);
+      if(IOTObj.method=="action"){
+           //拍照指令
+          if(IOTObj.actionId=="CAM"){  
+            client_sock.write("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":"+parseInt(+new Date()/1000)+",\"action\":"+IOTObj.params.action+",\"http_url\":\""+IOTObj.params.http_url+"\",\"count:\""+IOTObj.params.count+"}15B86F2D013B2618");
+          };
+          if(IOTObj.actionId=="CONFIG"){  
+            var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":%s,\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.inteval);
+            client_sock.write(sformat);
+          };
+          if(IOTObj.actionId=="Reboot"){  
+            var sformat=util.format("C28C0DB26D39331A{\"msg_type\":50,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
+            client_sock.write(sformat);
+          };
+      };
     });
 
     MqttClient.on('connect', function (topic, message) {
       // message is Buffer
       console.log(topic+':'+message.toString());
       //client.end();
-      var topiclist=[];
-      topiclist.push('$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name);
-      topiclist.push('$thing/down/raw/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name);
-      topiclist.push(DeviceInfo.product_id+'/'+DeviceInfo.device_name+'/control');
-      topiclist.push(DeviceInfo.product_id+'/'+DeviceInfo.device_name+'/data');
-      MqttClient.subscribe(topiclist);	
+      var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+      var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+      MqttClient.subscribe(topic1);	
+      MqttClient.subscribe(topic2);	
     });
 
   };

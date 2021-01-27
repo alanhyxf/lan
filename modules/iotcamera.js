@@ -110,12 +110,26 @@ module.exports = function (app) {
 
               //配置
               if(IOTObj.actionId=="CONFIG"){  
-                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":\"%s\",\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.opt,IOTObj.params.inteval);
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":\"%s\",\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s,\"upload_url\":\"%s\",\"audio_vol\":%d,\"led_level\":%d,\"at_cmds\":\"%s\"}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.opt,IOTObj.params.inteval,IOTObj.params.upload_url,IOTObj.params.audio_vol,IOTObj.params.led_level,IOTObj.params.at_cmds);
                 client_sock.write(sformat);
               };
               //重启
               if(IOTObj.actionId=="Reboot"){  
                 var sformat=util.format("C28C0DB26D39331A{\"msg_type\":50,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
+                client_sock.write(sformat);
+              };
+
+              if(IOTObj.actionId=="CAMNow"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":6,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
+                client_sock.write(sformat);
+              };
+
+              if(IOTObj.actionId=="Update"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":8,\"timestamp\":%s,\"firmware_url\":%s,\"update_version\":%s,\"firmware_md5\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.firmware_url,IOTObj.params.update_version,IOTObj.params.firmare_md5);
+                client_sock.write(sformat);
+              };
+              if(IOTObj.actionId=="UploadLog"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":10,\"timestamp\":%s,\"http_url\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.http_url);
                 client_sock.write(sformat);
               };
           };
@@ -138,31 +152,42 @@ module.exports = function (app) {
       InitMqtt(DeviceInfo);
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":1,"content":DeviceInfo.status}};
+        MqttClient.publish(topic, JSON.stringify(topicInfo));
+
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
       };  
       //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
       if (msg_type==3){       
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"err":DeviceInfo.status}};
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"content":DeviceInfo.status}};
         MqttClient.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==5){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"err":DeviceInfo.status}};
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"content":DeviceInfo.status}};
         MqttClient.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==7){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"err":DeviceInfo.status}};
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"content":DeviceInfo.status}};
         MqttClient.publish(topic, JSON.stringify(topicInfo));
       }; 
+
+      if (msg_type==9){
+        topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":9,"content":DeviceInfo.status}};
+        MqttClient.publish(topic, JSON.stringify(topicInfo));
+      }; 
+
       if (msg_type==51){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"err":DeviceInfo.status}};
+        topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"content":DeviceInfo.status}};
         MqttClient.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==99){
-        model.Device.create(deviceobj).then(function (device, err) {
+        model.Device.create(DeviceInfo).then(function (device, err) {
           var http = require('http');
           var querystring = require('querystring');
           var contents = {
@@ -227,13 +252,20 @@ module.exports = function (app) {
       DeviceInfo.signal=dataobj.signal;
       DeviceInfo.battery=dataobj.battery;
       DeviceInfo.firmware_version=dataobj.firmware_version;
-
+      DeviceInfo.err=dataobj.err;
+      DeviceInfo.timestamp=dataobj.timestamp;
+      DeviceInfo.temp_cpu=dataobj.temp_cpu;
+      DeviceInfo.temp_env=dataobj.temp_env;
+      DeviceInfo.status=util.format('{\"err\":%d,\"firmware_version\":%s,\"device_id\":%s,\"timestamp\":%d,\"battery\":%f,\"signal\":%s,\"temp_env\":%d,\"temp_cpu\":%d}',Deviceinfo.err,DeviceInfo.firmware_version,DeviceInfo.device_id,DeviceInfo.timestamp,DeviceInfo.battery,DeviceInfo.signal,DeviceInfo.temp_env,DeviceInfo.temp_cpu)
+      if(dataobj.msg_type==5){
+        console.log(dataobj.Image);
+      }
 
 
       //将来升级为注册指令，可以转换为msg_type处理。
        //已经注册过的设备
       var oldDevice = function (DeviceInfo) {
-          //console.log("Device Exist："+DeviceInfo.device_id);
+          console.log("Device Exist："+DeviceInfo.device_id);
           //然后根据数据包类型进行转换 msg_type： 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply
           ConvertMqtt(dataobj.msg_type,DeviceInfo);
       };

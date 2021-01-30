@@ -38,11 +38,7 @@ start = function (opts, callback) {
     var iotcareraserver=net.createServer(app.iotcamera).listen(config.get('port.iotcamera'), function () {
       console.log("iotcamera server listening on port %d", config.get('port.iotcamera'));
     });
-    iotcareraserver.on("connection", function(client_sock) {
-      console.log("client comming ");
 
-
-    });
   }
 
 

@@ -49,11 +49,7 @@ module.exports = function (app) {
     authCheck(userInfo, errorCB, successCB, errorCB);
   }
 
-  app.post('/upload', function (req, res) {
-    console.log('upload para:'+req.body);
-    return 'upload success';
-    //return update(req, res);
-  });
+
 
   app.post(/^\/(.*)\/(.*)$/, function (req, res) {
     return update(req, res);

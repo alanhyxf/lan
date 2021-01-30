@@ -33,7 +33,8 @@ module.exports = function (app) {
     //console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
     // 设置可接受的格式,  hex为二进制的文本编码
     client_sock.setEncoding("utf8");
-    
+    var mqtt_conn=new MqttConn(DeviceInfo,sock);
+    var topic,topicInfo;
     // 客户端断开连接的时候处理,用户断线离开了
     client_sock.on("close", function() {
       console.log("close socket");
@@ -42,8 +43,8 @@ module.exports = function (app) {
 
 
     function ConvertMqtt(msg_type,DeviceInfo,sock) { 
-      var topic,topicInfo;
-      var mqtt_conn=new MqttConn(DeviceInfo,sock);
+      
+      
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;

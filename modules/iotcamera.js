@@ -40,7 +40,7 @@ module.exports = function (app) {
       status:'',
       mqtt_status:0
     };
-    var mqtt_conn,topic,topicInfo;
+    var mqtt_conn,topic,topicInfo,msg_type;
    
 
 
@@ -72,6 +72,7 @@ module.exports = function (app) {
       console.log("Incoming IOTCamera Data");      
       let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
       //console.log("IOTCamera Data Type:"+dataobj.msg_type);
+      msg_type=dataobj.msg_type;
 
       //数据包保存到mongo里
       var payload = {
@@ -183,87 +184,85 @@ module.exports = function (app) {
 
         }  
             //ReplyMessage(msg_type,DeviceInfo,mqttclient);
-        console.log('ReplyMessage status:'+mqttclient.connected);
-        if(!mqttclient.connected){
-          DeviceInfo.mqtt_status=0;
-          return ;
-  
-        }
-        //如果是心跳包，直接返回心跳reply
-        if (msg_type==1){   
-          
-          topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-          topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":1,"content":DeviceInfo.status}};
-          mqttclient.publish(topic, JSON.stringify(topicInfo));
-  
-          client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
-        };  
-        //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
-        if (msg_type==3){       
-          topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-          topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"content":DeviceInfo.status}};
-          mqttclient.publish(topic, JSON.stringify(topicInfo));
-        }; 
-        if (msg_type==5){
-          topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-          topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"content":DeviceInfo.status}};
-          mqttclient.publish(topic, JSON.stringify(topicInfo));
-        }; 
-        if (msg_type==7){
-          topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-          topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"content":DeviceInfo.status}};
-          mqttclient.publish(topic, JSON.stringify(topicInfo));
-        }; 
-  
-        if (msg_type==9){
-          topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-          topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":9,"content":DeviceInfo.status}};
-          mqttclient.publish(topic, JSON.stringify(topicInfo));
-        }; 
-  
-        if (msg_type==51){
-          topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-          topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"content":DeviceInfo.status}};
-          mqttclient.publish(topic, JSON.stringify(topicInfo));
-        }; 
-        if (msg_type==99){
-          model.Device.create(DeviceInfo).then(function (device, err) {
-            var http = require('http');
-            var querystring = require('querystring');
-            var contents = {
-              productId:DeviceInfo.product_id,
-              deviceName:DeviceInfo.device_id,
-              nonce: parseInt(Date.now()/1000),
-              timestamp:parseInt(Date.now()/1000)
-            };  
-            
-            var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
-            var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
-            var app_secret=DeviceInfo.device_secret;
-            var sha1=crypto.createHmac('sha1', app_secret).update(str1).digest('HEX');
-            var sign=new Buffer(sha1).toString('base64');
-            var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
-            var str2=util.format(str2format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
-            var options = {
-              host:'ap-guangzhou.gateway.tencentdevices.com',
-              path:'/register/dev',
-              method:'POST',
-              headers:{
-                  'Content-Type':'application/x-www-form-urlencoded',
-                  'Content-Length':str2.length
-              }
-            };          
-            var req = http.request(options, function(res){
-              res.setEncoding('utf8');
-              res.on('data',function(data){
-                  console.log("data:",data);   //返回值
-              });
-            });  
-            req.write(str2);
-            req.end;                     
-          });
-        }; 
 
+        if(DeviceInfo.mqtt_status==1){     
+        
+          //如果是心跳包，直接返回心跳reply
+          if (msg_type==1){   
+            console.log('heart bear');
+            
+            topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+            topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":1,"content":DeviceInfo.status}};
+            mqttclient.publish(topic, JSON.stringify(topicInfo));
+    
+            client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
+          };  
+          //如果是抓拍响应包，把返回的错误信息发送到MQTT EG3DYFIS5P/${deviceName}/event
+          if (msg_type==3){       
+            topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+            topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"content":DeviceInfo.status}};
+            mqttclient.publish(topic, JSON.stringify(topicInfo));
+          }; 
+          if (msg_type==5){
+            topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+            topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"content":DeviceInfo.status}};
+            mqttclient.publish(topic, JSON.stringify(topicInfo));
+          }; 
+          if (msg_type==7){
+            topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+            topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"content":DeviceInfo.status}};
+            mqttclient.publish(topic, JSON.stringify(topicInfo));
+          }; 
+    
+          if (msg_type==9){
+            topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+            topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":9,"content":DeviceInfo.status}};
+            mqttclient.publish(topic, JSON.stringify(topicInfo));
+          }; 
+    
+          if (msg_type==51){
+            topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+            topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"content":DeviceInfo.status}};
+            mqttclient.publish(topic, JSON.stringify(topicInfo));
+          }; 
+          if (msg_type==99){
+            model.Device.create(DeviceInfo).then(function (device, err) {
+              var http = require('http');
+              var querystring = require('querystring');
+              var contents = {
+                productId:DeviceInfo.product_id,
+                deviceName:DeviceInfo.device_id,
+                nonce: parseInt(Date.now()/1000),
+                timestamp:parseInt(Date.now()/1000)
+              };  
+              
+              var str1format='deviceName=%s&nonce=%d&productId=%s&timestamp=%d';
+              var str1=util.format(str1format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp);
+              var app_secret=DeviceInfo.device_secret;
+              var sha1=crypto.createHmac('sha1', app_secret).update(str1).digest('HEX');
+              var sign=new Buffer(sha1).toString('base64');
+              var str2format='{\"deviceName\":\"%s\",\"nonce\":%d,\"productId\":\"%s\",\"timestamp\":%d,\"signature\":\"%s\"}';
+              var str2=util.format(str2format,contents.deviceName,contents.nonce,contents.productId,contents.timestamp,sign);
+              var options = {
+                host:'ap-guangzhou.gateway.tencentdevices.com',
+                path:'/register/dev',
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/x-www-form-urlencoded',
+                    'Content-Length':str2.length
+                }
+              };          
+              var req = http.request(options, function(res){
+                res.setEncoding('utf8');
+                res.on('data',function(data){
+                    console.log("data:",data);   //返回值
+                });
+              });  
+              req.write(str2);
+              req.end;                     
+            });
+          }; 
+        }
      
       };
 

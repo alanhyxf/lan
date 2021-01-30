@@ -54,10 +54,10 @@ module.exports = function (app) {
 
     function ReplyMessage(msg_type,DeviceInfo,mqttclient) { 
 
-      console.log('ReplyMessage begin:'+msg_type);
+      console.log('ReplyMessage begin:'+mqttclient);
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
-        console.log('beat heart');
+        
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":1,"content":DeviceInfo.status}};
         mqttclient.publish(topic, JSON.stringify(topicInfo));
@@ -172,9 +172,9 @@ module.exports = function (app) {
         
         //MqttInit(DeviceInfo);
 
-        console.log('1');
+        
         if(DeviceInfo.mqtt_status==0){ 
-          console.log('2');
+          
           var mqtt    = require('mqtt');
 
           //let product_id = DeviceInfo.product_id;
@@ -184,8 +184,7 @@ module.exports = function (app) {
           let connid = randomString(5);
           let expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
           var client_id = DeviceInfo.product_id + DeviceInfo.device_name;
-          var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
-          console.log('username:'+username);
+          var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;       
           let token = '';
           var password = '';
           if (signmethod === 'HMAC-SHA1') {
@@ -201,11 +200,9 @@ module.exports = function (app) {
               username,
               password,
               client_id
-            },function(){
-            console.log('3');
             }
           );
-          console.log('3.1');
+          
   
           mqttclient.on('connect', function () {
             //订阅presence主题
@@ -214,13 +211,11 @@ module.exports = function (app) {
             var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
             mqttclient.subscribe(topic1);	
             mqttclient.subscribe(topic2);	
-            console.log('4');
           });
            
           mqttclient.on('message', function (topic, message) {
             //收到的消息是一个Buffer
             console.log(message.toString());
-  
             var IOTObj=JSON.parse(message);
             if(IOTObj.method=="action"){
                 //return IOTObj.actionId;
@@ -229,7 +224,6 @@ module.exports = function (app) {
                   var sformat=util.format("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":%s,\"action\":%d,\"http_url\":\"%s\",\"count\":%d}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.action,IOTObj.params.http_url,IOTObj.params.count);
                   client_sock.write(sformat);
                 };
-  
                 //配置
                 if(IOTObj.actionId=="CONFIG"){  
                   var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":\"%s\",\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s,\"upload_url\":\"%s\",\"audio_vol\":%d,\"led_level\":%d,\"at_cmds\":\"%s\"}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.opt,IOTObj.params.inteval,IOTObj.params.upload_url,IOTObj.params.audio_vol,IOTObj.params.led_level,IOTObj.params.at_cmds);

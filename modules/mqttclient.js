@@ -46,14 +46,21 @@ function MqttConn(DeviceInfo,client_sock) {
           username:MqttOption.username,
           password:MqttOption.password,
           clientId:MqttOption.clientid
-      });
+      },function(){
+
+        console.log('MQTTConn:'+conn_status);  
+        var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+        Client.subscribe(topic1);	
+        Client.subscribe(topic2);	
+
+      }
+      
+      
+      );
     
     
-    console.log('MQTTConn:'+conn_status);  
-    var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    Client.subscribe(topic1);	
-    Client.subscribe(topic2);	
+
     
     
     Client.on('message', function (topic, message) {

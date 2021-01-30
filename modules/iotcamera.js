@@ -51,14 +51,8 @@ module.exports = function (app) {
     });
 
 
-    function MqttInit(DeviceInfo){     
- 
-      
-      
 
-    }
-
-    function ReplyMessage(msg_type,DeviceInfo) { 
+    function ReplyMessage(msg_type,DeviceInfo,mqttclient) { ,
 
       console.log('ReplyMessage begin:'+msg_type);
       //如果是心跳包，直接返回心跳reply
@@ -216,6 +210,7 @@ module.exports = function (app) {
             console.log('3');
             }
           );
+          console.log('3.1');
   
           mqttclient.on('connect', function () {
             //订阅presence主题
@@ -269,7 +264,7 @@ module.exports = function (app) {
           });  
         }
 
-        ReplyMessage(dataobj.msg_type,DeviceInfo);
+        ReplyMessage(dataobj.msg_type,DeviceInfo,mqttclient);
       };
 
       var newDevice = function (DeviceInfo) {

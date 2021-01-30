@@ -118,7 +118,7 @@ function MqttConn(DeviceInfo,client_sock) {
   
 
     this.set_publish= function(topic,message){
-      console.log(Client);
+      console.log('mqtt status:'+Client.connected);
       Client.publish(topic,message);
     };
  

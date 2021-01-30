@@ -33,7 +33,7 @@ module.exports = function (app) {
       status:'',
       mqtt_status:0
     };
-    var topic,topicInfo;
+    var mqtt_conn,topic,topicInfo;
    
 
 
@@ -160,29 +160,29 @@ module.exports = function (app) {
         var MqttConn=require('./mqttclient');
         var mqtt_conn=new MqttConn(DeviceInfo,client_sock);
         DeviceInfo.mqtt_status=1;
-      }
-
+      }.then(
       //将来升级为注册指令，可以转换为msg_type处理。
        //已经注册过的设备
-      var oldDevice = function (DeviceInfo) {
+        var oldDevice = function (DeviceInfo) {
           console.log("Device Exist："+DeviceInfo.device_id);
           //然后根据数据包类型进行转换 msg_type： 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply
           ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
-      };
+          };
 
-      var newDevice = function (DeviceInfo) {
+        var newDevice = function (DeviceInfo) {
         //新注册设备  转发MQTT注册指令
         console.log("Device New:"+DeviceInfo.device_id);
         ConvertMqtt(99,DeviceInfo,client_sock).then(function(){
           ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
         });
-        
-      };  
+        deviceCheck(DeviceInfo, oldDevice, newDevice);
 
-      deviceCheck(DeviceInfo, oldDevice, newDevice);
+      )
+
+
 
       //client_sock.end(); // 正常关闭
-    });
+    };
    
    
     client_sock.on("error", function(err) {

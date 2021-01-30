@@ -4,7 +4,7 @@ var crypto = require('crypto');
 var util = require('util');
 var cryptojs = require('crypto-js') ;
 var hash, hmac;
-var MqttClient;
+var Client;
 
 
 
@@ -55,13 +55,13 @@ exports.init = function (DeviceInfo,client_sock) {
 
   //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
     //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
-  MqttClient= mqtt.connect(MqttOption.url,{
+  Client= mqtt.connect(MqttOption.url,{
     username:MqttOption.username,
     password:MqttOption.password,
     clientId:MqttOption.clientid
   });
 
-  MqttClient.on('message', function (topic, message) {
+  Client.on('message', function (topic, message) {
     // message is Buffer
     console.log(topic+':'+message.toString());
     //client.end();
@@ -109,9 +109,11 @@ exports.init = function (DeviceInfo,client_sock) {
     console.log(topic+':'+message.toString());    
     var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
     var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-    MqttClient.subscribe(topic1);	
-    MqttClient.subscribe(topic2);	
+    Client.subscribe(topic1);	
+    Client.subscribe(topic2);	
   });
 
-  
+  return Client;
 };
+
+Exports.Client=Client;

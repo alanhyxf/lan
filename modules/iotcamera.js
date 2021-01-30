@@ -43,7 +43,7 @@ module.exports = function (app) {
 
     function ConvertMqtt(msg_type,DeviceInfo,sock) { 
 
-      var iotaction=MqttClient.Init(DeviceInfo,sock);
+      var MqttClient=MqttClient.Init(DeviceInfo,sock);
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
@@ -150,7 +150,7 @@ module.exports = function (app) {
       DeviceInfo.timestamp=dataobj.timestamp;
       DeviceInfo.temp_cpu=dataobj.temp_cpu;
       DeviceInfo.temp_env=dataobj.temp_env;
-      DeviceInfo.status=util.format('{\"err\":%d,\"firmware_version\":%s,\"device_id\":%s,\"timestamp\":%d,\"battery\":%f,\"signal\":%s,\"temp_env\":%d,\"temp_cpu\":%d}',Deviceinfo.err,DeviceInfo.firmware_version,DeviceInfo.device_id,DeviceInfo.timestamp,DeviceInfo.battery,DeviceInfo.signal,DeviceInfo.temp_env,DeviceInfo.temp_cpu)
+      DeviceInfo.status=util.format('{\"err\":%d,\"firmware_version\":%s,\"device_id\":%s,\"timestamp\":%d,\"battery\":%f,\"signal\":%s,\"temp_env\":%d,\"temp_cpu\":%d}',DeviceInfo.err,DeviceInfo.firmware_version,DeviceInfo.device_id,DeviceInfo.timestamp,DeviceInfo.battery,DeviceInfo.signal,DeviceInfo.temp_env,DeviceInfo.temp_cpu)
       if(dataobj.msg_type==5){
         console.log(dataobj.Image);
       }

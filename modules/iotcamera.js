@@ -48,18 +48,16 @@ module.exports = function (app) {
       if(DeviceInfo.mqtt_status==0){
 
         var MqttConn=require('./mqttclient');
-        var mqtt_conn=new MqttConn(DeviceInfo,client_sock).then(
-          function(){
-            DeviceInfo.mqtt_status=1;
-          }
+        var mqtt_conn=new MqttConn(DeviceInfo,client_sock);
+        DeviceInfo.mqtt_status=1;
           
-        );
+      )
 
     }
 
     function ReplyMessage(msg_type,DeviceInfo) { 
 
-    }
+    
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;

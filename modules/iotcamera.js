@@ -159,10 +159,11 @@ module.exports = function (app) {
 
           var MqttConn=require('./mqttclient');
           var mqtt_conn=new MqttConn(DeviceInfo,client_sock).then(
-            DeviceInfo.mqtt_status=1;
-          )
-          
-     
+            function(){
+              DeviceInfo.mqtt_status=1;
+            }
+            
+          );
       }
       //将来升级为注册指令，可以转换为msg_type处理。
        //已经注册过的设备
@@ -174,16 +175,15 @@ module.exports = function (app) {
 
       var newDevice = function (DeviceInfo) {
       //新注册设备  转发MQTT注册指令
-      console.log("Device New:"+DeviceInfo.device_id);
-      ConvertMqtt(99,DeviceInfo,client_sock).then(function(){
-        ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
-      });
-
+        console.log("Device New:"+DeviceInfo.device_id);
+        ConvertMqtt(99,DeviceInfo,client_sock).then(function(){
+          ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
+        });
+      };
 
       if (DeviceInfo.mqtt_status==1){
-
         deviceCheck(DeviceInfo, oldDevice, newDevice);
-      }
+      };
       
 
      
@@ -191,7 +191,7 @@ module.exports = function (app) {
 
 
       //client_sock.end(); // 正常关闭
-    };
+    });
    
    
     client_sock.on("error", function(err) {

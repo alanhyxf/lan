@@ -34,8 +34,8 @@ module.exports = function (app) {
     let MqttConn=require('./mqttclient');
     
     client_sock.setEncoding("utf8");
-    var mqtt_conn=new MqttConn(DeviceInfo,client_sock);
-    var topic,topicInfo;
+    let mqtt_conn=new MqttConn(DeviceInfo,client_sock);
+    let topic,topicInfo;
     // 客户端断开连接的时候处理,用户断线离开了
     client_sock.on("close", function() {
       console.log("close socket");
@@ -44,7 +44,6 @@ module.exports = function (app) {
 
 
     function ConvertMqtt(msg_type,DeviceInfo,client_sock) { 
-      
       
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   

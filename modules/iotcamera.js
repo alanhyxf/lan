@@ -54,7 +54,7 @@ module.exports = function (app) {
 
     function ReplyMessage(msg_type,DeviceInfo,mqttclient) { 
 
-      console.log('ReplyMessage username:'+mqttclient.options.username);
+      //console.log('ReplyMessage username:'+mqttclient.options.username);
       console.log('ReplyMessage status:'+mqttclient.connected);
       if(!mqttclient.connected){
         DeviceInfo.mqtt_status=0;
@@ -182,10 +182,6 @@ module.exports = function (app) {
         if(DeviceInfo.mqtt_status==0){ 
           
           const mqtt    = require('async-mqtt');
-
-          //let product_id = DeviceInfo.product_id;
-          //let device_name = DeviceInfo.device_name;
-          //let device_secret = DeviceInfo.device_secret;
           let signmethod = 'HMAC-SHA256';
           let connid = randomString(5);
           let expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
@@ -202,22 +198,26 @@ module.exports = function (app) {
               password = token + ';' + 'hmacsha256'
           }
 
-  
-          const mqttclient  = mqtt.connect(url,{
-              username,
-              password,
-              client_id
-            }
-          );
           
-  
+          const mqttclient  =  mqtt.connect(url,{
+            username,
+            password,
+            client_id
+          });
+
           mqttclient.on('connect', function () {
             //订阅presence主题
             DeviceInfo.mqtt_status=1;
             var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
             var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-            mqttclient.subscribe(topic1);	
-            mqttclient.subscribe(topic2);	
+            mqttclient.subscribe(topic1);
+            mqttclient.subscribe(topic2);
+          });
+
+          mqttclient.on('disconnect', function () {
+            //订阅presence主题
+            DeviceInfo.mqtt_status=0;
+            
           });
            
           mqttclient.on('message', function (topic, message) {
@@ -260,7 +260,7 @@ module.exports = function (app) {
           });  
         }
 
-        ReplyMessage(dataobj.msg_type,DeviceInfo,mqttclient);
+        
       };
 
       var newDevice = function (DeviceInfo) {

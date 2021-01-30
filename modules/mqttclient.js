@@ -10,7 +10,7 @@ function MqttConn(DeviceInfo,client_sock) {
   'use strict';
 
     let Client;
-    
+    let conn_status=0;
     function randomString(len, charSet) {
       charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       var randomString = '';
@@ -109,14 +109,14 @@ function MqttConn(DeviceInfo,client_sock) {
 
     this.set_connect = function(DeviceInfo){
       
-      if(conn_status!=1){
+      if(conn_status==0){
         let  MqttOption =getSign(DeviceInfo);
         Client= mqtt.connect(MqttOption.url,{
           username:MqttOption.username,
           password:MqttOption.password,
           clientId:MqttOption.clientid
         }).then(function(){
-          const conn_status=1;
+          conn_status=1;
         };
       }
       

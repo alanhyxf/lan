@@ -6,53 +6,52 @@ var cryptojs = require('crypto-js') ;
 var hash, hmac;
 
 
-function randomString(len, charSet) {
-  charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  var randomString = '';
-  for (var i = 0; i < len; i++) {
-      var randomPoz = Math.floor(Math.random() * charSet.length);
-      randomString += charSet.substring(randomPoz, randomPoz + 1);
-  }
-  return randomString;
-}
-
-function getSign(DeviceInfo) {
-  var product_id = DeviceInfo.product_id;
-  var device_name = DeviceInfo.device_name;
-  var device_secret = DeviceInfo.device_secret;
-  var signmethod = 'HMAC-SHA256';
-  
-  var connid = randomString(5);
-  var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
-  var client_id = product_id + device_name;
-  var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
-  var token = '';
-  var password = '';
-
-  if (signmethod === 'HMAC-SHA1') {
-     token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
-    password = token + ';' + 'hmacsha1'
-  } else {
-     
-      token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
-      password = token + ';' + 'hmacsha256'
-  }
-
-  return  {
-    url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
-    username:username,
-    password:password,
-    client_id:client_id
-  };
-
-}
-
 function MqttConn(DeviceInfo,client_sock) {
   'use strict';
 
-    var Client;
-    var MqttOption =getSign(DeviceInfo);
+    let Client;
+    let  MqttOption =getSign(DeviceInfo);
 
+    function randomString(len, charSet) {
+      charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      var randomString = '';
+      for (var i = 0; i < len; i++) {
+          var randomPoz = Math.floor(Math.random() * charSet.length);
+          randomString += charSet.substring(randomPoz, randomPoz + 1);
+      }
+      return randomString;
+    };
+    
+    function getSign(DeviceInfo) {
+      var product_id = DeviceInfo.product_id;
+      var device_name = DeviceInfo.device_name;
+      var device_secret = DeviceInfo.device_secret;
+      var signmethod = 'HMAC-SHA256';
+      
+      var connid = randomString(5);
+      var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
+      var client_id = product_id + device_name;
+      var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
+      var token = '';
+      var password = '';
+    
+      if (signmethod === 'HMAC-SHA1') {
+         token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
+        password = token + ';' + 'hmacsha1'
+      } else {
+         
+          token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
+          password = token + ';' + 'hmacsha256'
+      }
+    
+      return  {
+        url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
+        username:username,
+        password:password,
+        client_id:client_id
+      };
+    
+    };
     //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
       //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
     Client= mqtt.connect(MqttOption.url,{
@@ -114,7 +113,7 @@ function MqttConn(DeviceInfo,client_sock) {
     });
 
     this.set_publish= function(topic,message){
-
+      console.log(Client);
       Client.publish(topic,message);
 
 

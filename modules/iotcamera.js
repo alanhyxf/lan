@@ -9,20 +9,6 @@ var crypto = require('crypto');
 var util = require('util');
 var cryptojs = require('crypto-js') ;
 var hash, hmac;
-var MqttConn=require('./mqttclient');
-
-var DeviceInfo = {
-  device_id: '',
-  signal:'',
-  battery:'',
-  firmware_version:'',
-  product_id:'',
-  product_secret:'',
-  device_name:'',
-  device_secret:'',
-  client_id:'',
-  status:''
-};
 
 
 
@@ -32,6 +18,21 @@ module.exports = function (app) {
   return function (client_sock) {
     //console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
     // 设置可接受的格式,  hex为二进制的文本编码
+
+    let DeviceInfo = {
+      device_id: '',
+      signal:'',
+      battery:'',
+      firmware_version:'',
+      product_id:'',
+      product_secret:'',
+      device_name:'',
+      device_secret:'',
+      client_id:'',
+      status:''
+    };
+    let MqttConn=require('./mqttclient');
+    
     client_sock.setEncoding("utf8");
     var mqtt_conn=new MqttConn(DeviceInfo,client_sock);
     var topic,topicInfo;

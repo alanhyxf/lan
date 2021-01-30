@@ -45,6 +45,7 @@ module.exports = function (app) {
 
 
     function MqttInit(DeviceInfo){
+      console.log('MqttInit:'+DeviceInfo.mqtt_status);
       if(DeviceInfo.mqtt_status==0){
 
         var MqttConn=require('./mqttclient');
@@ -175,7 +176,7 @@ module.exports = function (app) {
         
         
           MqttInit(DeviceInfo,function(){
-              console.log('MqttInit begin');
+              console.log('MqttInit end');
               ReplyMessage(dataobj.msg_type,DeviceInfo);
             }
           )

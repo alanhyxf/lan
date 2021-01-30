@@ -100,7 +100,8 @@ function MqttConn(DeviceInfo,client_sock) {
       
     Client.on('connect', function (topic, message) {
       // message is Buffer
-      console.log('MQTT connect');    
+      console.log('MQTT connected');
+      console.log('ClientInfo:'+Client);    
 
     });
 

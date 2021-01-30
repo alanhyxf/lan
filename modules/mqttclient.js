@@ -4,8 +4,6 @@ var crypto = require('crypto');
 var util = require('util');
 var cryptojs = require('crypto-js') ;
 var hash, hmac;
-var Client;
-
 
 
 function randomString(len, charSet) {
@@ -49,10 +47,10 @@ function getSign(DeviceInfo) {
 
 }
 
-module.exports =  function (DeviceInfo,client_sock) {
+function MqttConn(DeviceInfo,client_sock) {
   'use strict';
 
-  return function(mqttclient){
+    var Client;
     var MqttOption =getSign(DeviceInfo);
 
     //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
@@ -106,7 +104,7 @@ module.exports =  function (DeviceInfo,client_sock) {
       };
     });
 
-    MqttClient.on('connect', function (topic, message) {
+    Client.on('connect', function (topic, message) {
       // message is Buffer
       console.log(topic+':'+message.toString());    
       var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
@@ -119,3 +117,5 @@ module.exports =  function (DeviceInfo,client_sock) {
   }  
   
 };
+
+module.exports=MqttConn;

@@ -49,12 +49,9 @@ function getSign(DeviceInfo) {
 
 }
 
-exports.init() = function (DeviceInfo,client_sock) {
+exports.init = function (DeviceInfo,client_sock) {
   'use strict';
-  
-    
-
-  var MqttOption =getSign(DeviceInfo);
+   var MqttOption =getSign(DeviceInfo);
 
   //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
     //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册

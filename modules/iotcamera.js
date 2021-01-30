@@ -9,7 +9,7 @@ var crypto = require('crypto');
 var util = require('util');
 var cryptojs = require('crypto-js') ;
 var hash, hmac;
-var MqttClient=require('mqttclient');
+var MqttClient=require('./mqttclient');
 
 var DeviceInfo = {
   device_id: '',
@@ -167,9 +167,9 @@ module.exports = function (app) {
       var newDevice = function (DeviceInfo) {
         //新注册设备  转发MQTT注册指令
         console.log("Device New:"+DeviceInfo.device_id);
-        ConvertMqtt(99,DeviceInfo,client_sock).then{
+        ConvertMqtt(99,DeviceInfo,client_sock).then(){function{
           ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
-        };
+        });
         
       };  
 

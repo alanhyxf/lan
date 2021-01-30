@@ -113,7 +113,7 @@ function MqttConn(DeviceInfo,client_sock) {
       Client.subscribe(topic2);	
     });
 
-    function set_publish(topic,message){
+    this.set_publish= function(topic,message){
 
       Client.publish(topic,message);
 

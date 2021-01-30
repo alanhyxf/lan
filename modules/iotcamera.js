@@ -18,8 +18,9 @@ module.exports = function (app) {
   return function (client_sock) {
     //console.log("client comming", client_sock.remoteAddress, client_sock.remotePort);
     // 设置可接受的格式,  hex为二进制的文本编码
+    client_sock.setEncoding("utf8");
 
-    let DeviceInfo = {
+    var DeviceInfo = {
       device_id: '',
       signal:'',
       battery:'',
@@ -29,15 +30,15 @@ module.exports = function (app) {
       device_name:'',
       device_secret:'',
       client_id:'',
-      status:''
+      status:'',
+      mqtt_status:0
     };
-    
-    let MqttConn=require('./mqttclient');
-    let mqtt_conn=new MqttConn(DeviceInfo,client_sock);
-    client_sock.setEncoding("utf8");
-    
-    let topic,topicInfo;
+    var topic,topicInfo;
+   
+
+
     // 客户端断开连接的时候处理,用户断线离开了
+
     client_sock.on("close", function() {
       console.log("close socket");
     });
@@ -153,10 +154,13 @@ module.exports = function (app) {
       DeviceInfo.temp_cpu=dataobj.temp_cpu;
       DeviceInfo.temp_env=dataobj.temp_env;
       DeviceInfo.status=util.format('{\"err\":%d,\"firmware_version\":%s,\"device_id\":%s,\"timestamp\":%d,\"battery\":%f,\"signal\":%s,\"temp_env\":%d,\"temp_cpu\":%d}',DeviceInfo.err,DeviceInfo.firmware_version,DeviceInfo.device_id,DeviceInfo.timestamp,DeviceInfo.battery,DeviceInfo.signal,DeviceInfo.temp_env,DeviceInfo.temp_cpu)
-      if(dataobj.msg_type==5){
-        console.log(dataobj.Image);
-      }
 
+      if(DeviceInfo.mqtt_status==0){
+
+        var MqttConn=require('./mqttclient');
+        var mqtt_conn=new MqttConn(DeviceInfo,client_sock);
+        DeviceInfo.mqtt_status=1;
+      }
 
       //将来升级为注册指令，可以转换为msg_type处理。
        //已经注册过的设备

@@ -46,7 +46,7 @@ module.exports = function (app) {
 
 
     function ConvertMqtt(msg_type,DeviceInfo,client_sock) { 
-      mqtt_conn.set_connect(DeviceInfo);
+      
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;

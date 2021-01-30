@@ -40,14 +40,21 @@ function MqttConn(DeviceInfo,client_sock) {
       password:password,
       client_id:client_id
     };
-    
+    console.log('MqttOption:'+JSON.stringify(MqttOption));
     
     Client= mqtt.connect(MqttOption.url,{
           username:MqttOption.username,
           password:MqttOption.password,
           clientId:MqttOption.clientid
       });
-        
+
+    console.log('MQTTConn:'+Client.connect);  
+    var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+    var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+    Client.subscribe(topic1);	
+    Client.subscribe(topic2);	
+    
+    
     Client.on('message', function (topic, message) {
       // message is Buffer
       console.log(topic+':'+message.toString());
@@ -93,11 +100,8 @@ function MqttConn(DeviceInfo,client_sock) {
       
     Client.on('connect', function (topic, message) {
       // message is Buffer
-      //console.log(topic+':'+message.toString());    
-      var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-      var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-      Client.subscribe(topic1);	
-      Client.subscribe(topic2);	
+      console.log('MQTT connect');    
+
     });
 
 

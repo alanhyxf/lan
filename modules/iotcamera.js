@@ -51,13 +51,13 @@ module.exports = function (app) {
         var mqtt_conn=new MqttConn(DeviceInfo,client_sock);
         DeviceInfo.mqtt_status=1;
           
-      )
+      }
 
     }
 
     function ReplyMessage(msg_type,DeviceInfo) { 
 
-    
+      console.log('ReplyMessage begin:'+msg_type);
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
@@ -174,8 +174,8 @@ module.exports = function (app) {
         //然后根据数据包类型进行转换 msg_type： 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply
         
         
-          MqttInit(DeviceInfo).then(
-            function(){
+          MqttInit(DeviceInfo,function(){
+              console.log('MqttInit begin');
               ReplyMessage(dataobj.msg_type,DeviceInfo);
             }
           )

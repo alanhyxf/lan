@@ -125,6 +125,8 @@ module.exports = function (app) {
             username,
             password,
             client_id
+          },function(){
+            console.log('mqtt connect now');
           });
 
           mqttclient.on('connect', function () {
@@ -186,7 +188,7 @@ module.exports = function (app) {
             //ReplyMessage(msg_type,DeviceInfo,mqttclient);
 
         console.log('status:'+DeviceInfo.mqtt_status+' msgtype:'+msg_type);
-        console.log(!mqttclient);
+        console.log(!!mqttclient);
         if((DeviceInfo.mqtt_status==1)&&(!mqttclient)){     
         
           //如果是心跳包，直接返回心跳reply

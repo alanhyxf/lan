@@ -177,6 +177,8 @@ module.exports = function (app) {
         
         
          var MqttInitInfo= MqttInit(DeviceInfo,function(){
+              if (err) return console.error(err);
+              console.log(data.toString());
               console.log('MqttInit end');
               ReplyMessage(dataobj.msg_type,DeviceInfo);
             }

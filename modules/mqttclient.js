@@ -46,8 +46,10 @@ function MqttConn(DeviceInfo,client_sock) {
           username:MqttOption.username,
           password:MqttOption.password,
           clientId:MqttOption.clientid
-      },function(){
-
+      },function(err,data){
+        if (err) return console.error(err);
+        console.log(data.toString());
+        
         console.log('MQTTConn:'+conn_status);  
         var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;

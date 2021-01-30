@@ -178,7 +178,7 @@ module.exports = function (app) {
         
         //MqttInit(DeviceInfo);
 
-        
+        console.log('before connect:'+DeviceInfo.mqtt_status);
         if(DeviceInfo.mqtt_status==0){ 
           
           const mqtt    = require('async-mqtt');
@@ -208,6 +208,7 @@ module.exports = function (app) {
           mqttclient.on('connect', function () {
             //订阅presence主题
             DeviceInfo.mqtt_status=1;
+            console.log('after connect:'+DeviceInfo.mqtt_status);
             var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
             var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
             mqttclient.subscribe(topic1);
@@ -258,6 +259,15 @@ module.exports = function (app) {
             };
             //client.end();
           });  
+
+          mqttclient.reconnect(function(){
+            ReplyMessage(msg_type,DeviceInfo,mqttclient);
+
+          })
+          
+
+
+
         }
 
         

@@ -57,7 +57,7 @@ module.exports = function (app) {
         
         var mqtt    = require('mqtt');
 
-        this.MqttOption=function(DeviceInfo){
+        var MqttOption=function(DeviceInfo){
           let product_id = DeviceInfo.product_id;
           let device_name = DeviceInfo.device_name;
           let device_secret = DeviceInfo.device_secret;
@@ -83,10 +83,10 @@ module.exports = function (app) {
           };
         }
 
-        var mqttclient  = mqtt.connect(this.MqttOption.url,{
-          username:this.MqttOption.username,
-          password:this.MqttOption.password,
-          clientId:this.MqttOption.clientid
+        var mqttclient  = mqtt.connect(MqttOption.url,{
+          username:MqttOption.username,
+          password:MqttOption.password,
+          clientId:MqttOption.clientid
         });
 
         mqttclient.on('connect', function () {

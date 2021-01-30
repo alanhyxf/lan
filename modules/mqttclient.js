@@ -6,7 +6,7 @@ var cryptojs = require('crypto-js') ;
 var hash, hmac;
 
 
-module.exports= MqttConn(DeviceInfo,client_sock) {
+module.exports= function(DeviceInfo,client_sock) {
     
     this.conn_status=0;
 

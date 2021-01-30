@@ -12,35 +12,35 @@ function MqttConn(DeviceInfo,client_sock) {
     var Client;
     var conn_status=0;
   
-    var  MqttOption =function(DeviceInfo){
-      var product_id = DeviceInfo.product_id;
-      var device_name = DeviceInfo.device_name;
-      var device_secret = DeviceInfo.device_secret;
-      var signmethod = 'HMAC-SHA256';
-  
-      var connid = randomString(5);
-      var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
-      var client_id = product_id + device_name;
-      var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
-      var token = '';
-      var password = '';
+   
+    var product_id = DeviceInfo.product_id;
+    var device_name = DeviceInfo.device_name;
+    var device_secret = DeviceInfo.device_secret;
+    var signmethod = 'HMAC-SHA256';
 
-      if (signmethod === 'HMAC-SHA1') {
-        token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
-        password = token + ';' + 'hmacsha1'
-      } else {
-        
-          token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
-          password = token + ';' + 'hmacsha256'
-      }
+    var connid = randomString(5);
+    var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
+    var client_id = product_id + device_name;
+    var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
+    var token = '';
+    var password = '';
 
-      return  {
-        url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
-        username:username,
-        password:password,
-        client_id:client_id
-      };
+    if (signmethod === 'HMAC-SHA1') {
+      token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
+      password = token + ';' + 'hmacsha1'
+    } else {
+      
+        token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
+        password = token + ';' + 'hmacsha256'
+    }
+
+    var MqttOption=  {
+      url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
+      username:username,
+      password:password,
+      client_id:client_id
     };
+    
     
     Client= mqtt.connect(MqttOption.url,{
           username:MqttOption.username,

@@ -15,7 +15,8 @@ start = function (opts, callback) {
   app.listen(config.get('port.http'), function () {
     console.log("http server run on port %d", config.get('port.http'));
   });
-
+  
+  /*
   if (_.include(app.config.get('modules'), 'websocket')) {
     var webSocketServer = new WebSocketServer({port: config.get('port.websocket')});
     app.websocket(webSocketServer);
@@ -33,6 +34,7 @@ start = function (opts, callback) {
       console.log("mqtt server listening on port %d", config.get('port.mqtt'));
     });
   }
+*/
 
   if (_.include(app.config.get('modules'), 'iotcamera')) {
     var iotcareraserver=net.createServer(app.iotcamera).listen(config.get('port.iotcamera'), function () {

@@ -44,9 +44,22 @@ module.exports = function (app) {
     });
 
 
+    function MqttInit(DeviceInfo){
+      if(DeviceInfo.mqtt_status==0){
 
-    function ConvertMqtt(msg_type,DeviceInfo,client_sock) { 
-      
+        var MqttConn=require('./mqttclient');
+        var mqtt_conn=new MqttConn(DeviceInfo,client_sock).then(
+          function(){
+            DeviceInfo.mqtt_status=1;
+          }
+          
+        );
+
+    }
+
+    function ReplyMessage(msg_type,DeviceInfo) { 
+
+    }
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
@@ -133,7 +146,7 @@ module.exports = function (app) {
          return client_sock.end(); 
          
       };
-      //console.log("Incoming IOTCamera Data");      
+      console.log("Incoming IOTCamera Data");      
       let dataobj=JSON.parse(data.slice(data.indexOf("{"),data.indexOf("}")+1));
       //console.log("IOTCamera Data Type:"+dataobj.msg_type);
 
@@ -155,40 +168,33 @@ module.exports = function (app) {
       DeviceInfo.temp_env=dataobj.temp_env;
       DeviceInfo.status=util.format('{\"err\":%d,\"firmware_version\":%s,\"device_id\":%s,\"timestamp\":%d,\"battery\":%f,\"signal\":%s,\"temp_env\":%d,\"temp_cpu\":%d}',DeviceInfo.err,DeviceInfo.firmware_version,DeviceInfo.device_id,DeviceInfo.timestamp,DeviceInfo.battery,DeviceInfo.signal,DeviceInfo.temp_env,DeviceInfo.temp_cpu)
 
-      if(DeviceInfo.mqtt_status==0){
-
-          var MqttConn=require('./mqttclient');
-          var mqtt_conn=new MqttConn(DeviceInfo,client_sock).then(
-            function(){
-              DeviceInfo.mqtt_status=1;
-            }
-            
-          );
-      }
+      
       //将来升级为注册指令，可以转换为msg_type处理。
        //已经注册过的设备
       var oldDevice = function (DeviceInfo) {
         console.log("Device Exist："+DeviceInfo.device_id);
         //然后根据数据包类型进行转换 msg_type： 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply
-        ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
-        };
+        
+        
+          MqttInit(DeviceInfo).then(
+            function(){
+              ReplyMessage(dataobj.msg_type,DeviceInfo);
+            }
+          )
+       
+        
+      };
 
       var newDevice = function (DeviceInfo) {
       //新注册设备  转发MQTT注册指令
         console.log("Device New:"+DeviceInfo.device_id);
-        ConvertMqtt(99,DeviceInfo,client_sock).then(function(){
-          ConvertMqtt(dataobj.msg_type,DeviceInfo,client_sock);
-        });
+        console.log('Please config new device in Cloud Platform');
+
       };
 
-      if (DeviceInfo.mqtt_status==1){
-        deviceCheck(DeviceInfo, oldDevice, newDevice);
-      };
       
-
-     
-
-
+      deviceCheck(DeviceInfo, oldDevice, newDevice);
+      
 
       //client_sock.end(); // 正常关闭
     });

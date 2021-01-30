@@ -38,10 +38,10 @@ module.exports= function(DeviceInfo,client_sock) {
     
 
    
-    this.Client= mqtt.connect(MqttOption.url,{
-          username:MqttOption.username,
-          password:MqttOption.password,
-          clientId:MqttOption.clientid
+    this.Client= mqtt.connect(this.MqttOption.url,{
+          username:this.MqttOption.username,
+          password:this.MqttOption.password,
+          clientId:this.MqttOption.clientid
         },function(err,data){
           if (err) return console.error(err);
           console.log('huidiao function');

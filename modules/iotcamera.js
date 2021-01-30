@@ -183,7 +183,7 @@ module.exports = function (app) {
           let signmethod = 'HMAC-SHA256';
           let connid = randomString(5);
           let expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
-          var client_id = product_id + device_name;
+          var client_id = DeviceInfo.product_id + DeviceInfo.device_name;
           var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
           console.log('username:'+username);
           let token = '';

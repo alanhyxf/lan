@@ -100,7 +100,7 @@ module.exports = function (app) {
         
         //MqttInit(DeviceInfo);
 
-        
+        console.log('mqtt_status1 :'+DeviceInfo.mqtt_status);
         if(DeviceInfo.mqtt_status==0){ 
           
           const mqtt    = require('async-mqtt');
@@ -121,7 +121,7 @@ module.exports = function (app) {
           }
 
           
-          const mqttclient  =  mqtt.connect(url,{
+          var mqttclient  =  mqtt.connect(url,{
             username,
             password,
             client_id
@@ -188,8 +188,8 @@ module.exports = function (app) {
             //ReplyMessage(msg_type,DeviceInfo,mqttclient);
 
         console.log('status:'+DeviceInfo.mqtt_status+' msgtype:'+msg_type);
-        console.log(!!mqttclient);
-        if((DeviceInfo.mqtt_status==1)&&(!mqttclient)){     
+        
+        if((DeviceInfo.mqtt_status==1)&&(typeof(mqttclient)!="undefined"){     
         
           //如果是心跳包，直接返回心跳reply
           if (msg_type==1){   

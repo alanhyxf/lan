@@ -54,7 +54,7 @@ module.exports = function (app) {
 
     function ReplyMessage(msg_type,DeviceInfo,mqttclient) { 
 
-      console.log('ReplyMessage begin:'+mqttclient);
+      console.log('ReplyMessage begin:'+mqttclient.options.username);
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         

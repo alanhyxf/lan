@@ -52,9 +52,9 @@ module.exports = function (app) {
 
 
     function MqttInit(DeviceInfo){     
-
+      console.log('1');
       if(DeviceInfo.mqtt_status==0){ 
-        
+        console.log('2');
         var mqtt    = require('mqtt');
 
         var MqttOption=function(DeviceInfo){
@@ -87,7 +87,11 @@ module.exports = function (app) {
           username:MqttOption.username,
           password:MqttOption.password,
           clientId:MqttOption.clientid
-        });
+        },function(){
+          console.log('3');
+        }
+        
+        );
 
         mqttclient.on('connect', function () {
           //订阅presence主题
@@ -96,6 +100,7 @@ module.exports = function (app) {
           var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
           mqttclient.subscribe(topic1);	
           mqttclient.subscribe(topic2);	
+          console.log('4');
         });
          
         mqttclient.on('message', function (topic, message) {

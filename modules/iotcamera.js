@@ -186,7 +186,8 @@ module.exports = function (app) {
             //ReplyMessage(msg_type,DeviceInfo,mqttclient);
 
         console.log('status:'+DeviceInfo.mqtt_status+' msgtype:'+msg_type);
-        if(DeviceInfo.mqtt_status==1){     
+        console.log(!mqttclient);
+        if((DeviceInfo.mqtt_status==1)&&(!mqttclient)){     
         
           //如果是心跳包，直接返回心跳reply
           if (msg_type==1){   

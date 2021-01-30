@@ -43,12 +43,12 @@ module.exports = function (app) {
 
     function ConvertMqtt(msg_type,DeviceInfo,sock) { 
 
-      var MqttClient=MqttClient.Init(DeviceInfo,sock);
+      var mqtt_client=MqttClient(DeviceInfo,sock);
       //如果是心跳包，直接返回心跳reply
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":1,"content":DeviceInfo.status}};
-        MqttClient.publish(topic, JSON.stringify(topicInfo));
+        mqtt_client.publish(topic, JSON.stringify(topicInfo));
 
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
       };  
@@ -56,29 +56,29 @@ module.exports = function (app) {
       if (msg_type==3){       
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"content":DeviceInfo.status}};
-        MqttClient.publish(topic, JSON.stringify(topicInfo));
+        mqtt_client.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==5){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"content":DeviceInfo.status}};
-        MqttClient.publish(topic, JSON.stringify(topicInfo));
+        mqtt_client.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==7){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"content":DeviceInfo.status}};
-        MqttClient.publish(topic, JSON.stringify(topicInfo));
+        mqtt_client.publish(topic, JSON.stringify(topicInfo));
       }; 
 
       if (msg_type==9){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":9,"content":DeviceInfo.status}};
-        MqttClient.publish(topic, JSON.stringify(topicInfo));
+        mqtt_client.publish(topic, JSON.stringify(topicInfo));
       }; 
 
       if (msg_type==51){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"content":DeviceInfo.status}};
-        MqttClient.publish(topic, JSON.stringify(topicInfo));
+        mqtt_client.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==99){
         model.Device.create(DeviceInfo).then(function (device, err) {

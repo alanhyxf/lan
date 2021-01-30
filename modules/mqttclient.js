@@ -48,8 +48,8 @@ function MqttConn(DeviceInfo,client_sock) {
           clientId:MqttOption.clientid
       });
     
-    console.log('MqttClient:'+JSON.stringify(Client));
-    console.log('MQTTConn:'+Client.connect);  
+    
+    console.log('MQTTConn:'+conn_status);  
     var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
     var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
     Client.subscribe(topic1);	
@@ -102,7 +102,8 @@ function MqttConn(DeviceInfo,client_sock) {
     Client.on('connect', function (topic, message) {
       // message is Buffer
       console.log('MQTT connected');
-      console.log('ClientInfo:'+Client);    
+      conn_status=1;
+         
 
     });
 

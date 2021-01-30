@@ -53,6 +53,7 @@ module.exports = function (app) {
         DeviceInfo.mqtt_status=1;
           
       }
+      return DeviceInfo.mqtt_status;
 
     }
 
@@ -175,7 +176,7 @@ module.exports = function (app) {
         //然后根据数据包类型进行转换 msg_type： 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply
         
         
-          MqttInit(DeviceInfo,function(){
+         var MqttInitInfo= MqttInit(DeviceInfo,function(){
               console.log('MqttInit end');
               ReplyMessage(dataobj.msg_type,DeviceInfo);
             }

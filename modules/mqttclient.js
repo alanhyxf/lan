@@ -127,5 +127,9 @@ module.exports= function(DeviceInfo,client_sock) {
       console.log('mqtt status:'+Client.connected);
       Client.publish(topic,message);
     };
+
+    this.show_status=function(){
+      console.log('mqtt status'+this.Client);
+    }
  
 };

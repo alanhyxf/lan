@@ -3,7 +3,6 @@ var db = new Database();
 //var authCheck = require('../auth/basic');
 var deviceCheck = require('../auth/deviceCheck');
 //var getAuthInfo = require('./utils/getAuth');
-var mqtt = require("mqtt");
 var model = require('../models');
 var crypto = require('crypto');
 var util = require('util');
@@ -11,7 +10,15 @@ var cryptojs = require('crypto-js') ;
 var hash, hmac;
 
 
-
+function randomString(len, charSet) {
+  charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var randomString = '';
+  for (var i = 0; i < len; i++) {
+      var randomPoz = Math.floor(Math.random() * charSet.length);
+      randomString += charSet.substring(randomPoz, randomPoz + 1);
+  }
+  return randomString;
+};
 
 module.exports = function (app) {
   'use strict';
@@ -44,22 +51,98 @@ module.exports = function (app) {
     });
 
 
-    function MqttInit(DeviceInfo){
-      console.log('MqttInit:'+DeviceInfo.mqtt_status);
-      if(DeviceInfo.mqtt_status==0){
-        console.log('1');
-        var MqttConn=require('./mqttclient');
-        console.log('2');
-        mqtt_conn=new MqttConn(DeviceInfo,client_sock,function(err,data){
-          DeviceInfo.mqtt_status=1;
-          console.log('3');
-          return DeviceInfo.mqtt_status;
+    function MqttInit(DeviceInfo){     
 
+      if(DeviceInfo.mqtt_status==0){ 
+        
+        var mqtt    = require('mqtt');
+
+        this.MqttOption=function(DeviceInfo){
+          let product_id = DeviceInfo.product_id;
+          let device_name = DeviceInfo.device_name;
+          let device_secret = DeviceInfo.device_secret;
+          var signmethod = 'HMAC-SHA256';
+          var connid = randomString(5);
+          var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
+          let client_id = product_id + device_name;
+          let username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
+          let token = '';
+          let password = '';
+          if (signmethod === 'HMAC-SHA1') {
+            token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
+            password = token + ';' + 'hmacsha1'
+          } else {
+              token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
+              password = token + ';' + 'hmacsha256'
+          }
+          return   {
+            url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
+            username:username,
+            password:password,
+            client_id:client_id
+          };
+        }
+
+        var mqttclient  = mqtt.connect(this.MqttOption.url,{
+          username:this.MqttOption.username,
+          password:this.MqttOption.password,
+          clientId:this.MqttOption.clientid
+        });
+
+        mqttclient.on('connect', function () {
+          //订阅presence主题
+          DeviceInfo.mqtt_status=1;
+          var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+          var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+          mqttclient.subscribe(topic1);	
+          mqttclient.subscribe(topic2);	
+        });
+         
+        mqttclient.on('message', function (topic, message) {
+          //收到的消息是一个Buffer
+          console.log(message.toString());
+
+          var IOTObj=JSON.parse(message);
+          if(IOTObj.method=="action"){
+
+              //return IOTObj.actionId;
+              //拍照指令
+              if(IOTObj.actionId=="CAM"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":4,\"timestamp\":%s,\"action\":%d,\"http_url\":\"%s\",\"count\":%d}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.action,IOTObj.params.http_url,IOTObj.params.count);
+                client_sock.write(sformat);
+              };
+
+              //配置
+              if(IOTObj.actionId=="CONFIG"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":52,\"timestamp\":%s,\"conn_id\":0,\"app\":\"%s\",\"host\":\"%s\",\"port\":%d,\"opt\":%d,\"inteval\":%s,\"upload_url\":\"%s\",\"audio_vol\":%d,\"led_level\":%d,\"at_cmds\":\"%s\"}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.app,IOTObj.params.host,IOTObj.params.port,IOTObj.params.opt,IOTObj.params.inteval,IOTObj.params.upload_url,IOTObj.params.audio_vol,IOTObj.params.led_level,IOTObj.params.at_cmds);
+                client_sock.write(sformat);
+              };
+              //重启
+              if(IOTObj.actionId=="Reboot"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":50,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
+                client_sock.write(sformat);
+              };
+
+              if(IOTObj.actionId=="CAMNow"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":6,\"timestamp\":%s}15B86F2D013B2618",parseInt(+new Date()/1000));
+                client_sock.write(sformat);
+              };
+
+              if(IOTObj.actionId=="Update"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":8,\"timestamp\":%s,\"firmware_url\":%s,\"update_version\":%s,\"firmware_md5\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.firmware_url,IOTObj.params.update_version,IOTObj.params.firmare_md5);
+                client_sock.write(sformat);
+              };
+              if(IOTObj.actionId=="UploadLog"){  
+                var sformat=util.format("C28C0DB26D39331A{\"msg_type\":10,\"timestamp\":%s,\"http_url\":%s}15B86F2D013B2618",parseInt(+new Date()/1000),IOTObj.params.http_url);
+                client_sock.write(sformat);
+              };
+          };
+          //client.end();
         });
         
           
       }
-      console.log('5');
+      
       
 
     }
@@ -71,7 +154,7 @@ module.exports = function (app) {
       if (msg_type==1){   
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":1,"content":DeviceInfo.status}};
-        mqtt_conn.set_publish(topic, JSON.stringify(topicInfo));
+        mqttclient.publish(topic, JSON.stringify(topicInfo));
 
         client_sock.write("C28C0DB26D39331A{\"msg_type\":2,\"timestamp\":"+parseInt(+new Date()/1000)+"}15B86F2D013B2618");
       };  
@@ -79,29 +162,29 @@ module.exports = function (app) {
       if (msg_type==3){       
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":3,"content":DeviceInfo.status}};
-        mqtt_conn.set_publish(topic, JSON.stringify(topicInfo));
+        mqttclient.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==5){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":5,"content":DeviceInfo.status}};
-        mqtt_conn.set_publish(topic, JSON.stringify(topicInfo));
+        mqttclient.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==7){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":7,"content":DeviceInfo.status}};
-        mqtt_conn.set_publish(topic, JSON.stringify(topicInfo));
+        mqttclient.publish(topic, JSON.stringify(topicInfo));
       }; 
 
       if (msg_type==9){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":9,"content":DeviceInfo.status}};
-        mqtt_conn.set_publish(topic, JSON.stringify(topicInfo));
+        mqttclient.publish(topic, JSON.stringify(topicInfo));
       }; 
 
       if (msg_type==51){
         topic='$thing/up/event/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
         topicInfo={"method":"event_post","clientToken":"123","version":"1.0","eventId":"DeviceReply","type":"info","timestamp":0,"params":{"event":51,"content":DeviceInfo.status}};
-        mqtt_conn.set_publish(topic, JSON.stringify(topicInfo));
+        mqttclient.publish(topic, JSON.stringify(topicInfo));
       }; 
       if (msg_type==99){
         model.Device.create(DeviceInfo).then(function (device, err) {

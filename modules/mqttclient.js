@@ -6,67 +6,58 @@ var cryptojs = require('crypto-js') ;
 var hash, hmac;
 
 
-function MqttConn(DeviceInfo,client_sock) {
-    'use strict';
+module.exports= MqttConn(DeviceInfo,client_sock) {
+    
+    this.conn_status=0;
 
-    var Client;
-    var conn_status=0;
-  
-   
-    var product_id = DeviceInfo.product_id;
-    var device_name = DeviceInfo.device_name;
-    var device_secret = DeviceInfo.device_secret;
-    var signmethod = 'HMAC-SHA256';
-
-    var connid = randomString(5);
-    var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
-    var client_id = product_id + device_name;
-    var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
-    var token = '';
-    var password = '';
-
-    if (signmethod === 'HMAC-SHA1') {
-      token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
-      password = token + ';' + 'hmacsha1'
-    } else {
-      
-        token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
-        password = token + ';' + 'hmacsha256'
+    this.MqttOption=function(DeviceInfo){
+      let product_id = DeviceInfo.product_id;
+      let device_name = DeviceInfo.device_name;
+      let device_secret = DeviceInfo.device_secret;
+      var signmethod = 'HMAC-SHA256';
+      var connid = randomString(5);
+      var expiry = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
+      let client_id = product_id + device_name;
+      let username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;
+      let token = '';
+      let password = '';
+      if (signmethod === 'HMAC-SHA1') {
+        token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(device_secret))
+        password = token + ';' + 'hmacsha1'
+      } else {
+          token=cryptojs.HmacSHA256(username, cryptojs.enc.Base64.parse(device_secret))
+          password = token + ';' + 'hmacsha256'
+      }
+      return   {
+        url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
+        username:username,
+        password:password,
+        client_id:client_id
+      };
     }
+    
 
-    var MqttOption=  {
-      url:'mqtt://'+product_id+'.iotcloud.tencentdevices.com',
-      username:username,
-      password:password,
-      client_id:client_id
-    };
-    
-    
-    Client= mqtt.connect(MqttOption.url,{
+   
+    this.Client= mqtt.connect(MqttOption.url,{
           username:MqttOption.username,
           password:MqttOption.password,
           clientId:MqttOption.clientid
-      },function(err,data){
-        if (err) return console.error(err);
-        console.log('huidiao function');
-        console.log(data.toString());
+        },function(err,data){
+          if (err) return console.error(err);
+          console.log('huidiao function');
+          console.log(data.toString());
 
-        console.log('MQTTConn:'+conn_status);  
-        var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
-        Client.subscribe(topic1);	
-        Client.subscribe(topic2);	
-
-      }
-      
-      
+          console.log('MQTTConn:'+conn_status);  
+          var topic1='$thing/down/property/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+          var topic2='$thing/down/action/'+DeviceInfo.product_id+'/'+DeviceInfo.device_name;
+          Client.subscribe(topic1);	
+          Client.subscribe(topic2);	
+        }
       );
     
-    
 
     
-    
-    Client.on('message', function (topic, message) {
+    this.Client.on('message', function (topic, message) {
       // message is Buffer
       console.log(topic+':'+message.toString());
       //client.end();
@@ -109,12 +100,10 @@ function MqttConn(DeviceInfo,client_sock) {
       };
     });
       
-    Client.on('connect', function (topic, message) {
+    this.Client.on('connect', function (topic, message) {
       // message is Buffer
       console.log('MQTT connected');
-      conn_status=1;
-         
-
+      this.conn_status=1;
     });
 
 
@@ -140,5 +129,3 @@ function MqttConn(DeviceInfo,client_sock) {
     };
  
 };
-
-module.exports=MqttConn;

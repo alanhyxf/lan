@@ -10,8 +10,7 @@ function MqttConn(DeviceInfo,client_sock) {
   'use strict';
 
     let Client;
-    let  MqttOption =getSign(DeviceInfo);
-
+    
     function randomString(len, charSet) {
       charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       var randomString = '';
@@ -54,11 +53,7 @@ function MqttConn(DeviceInfo,client_sock) {
     };
     //console.log(MqttOption.url+'/'+MqttOption.username+'/'+MqttOption.password+'/'+MqttOption.client_id);
       //根据msg_type处理不同的消息。 1 心跳包 3 抓拍reply  5 长链接抓拍reply  7 升级包reply 51 配置reply  99 注册
-    Client= mqtt.connect(MqttOption.url,{
-      username:MqttOption.username,
-      password:MqttOption.password,
-      clientId:MqttOption.clientid
-    });
+    
 
     Client.on('message', function (topic, message) {
       // message is Buffer
@@ -111,6 +106,21 @@ function MqttConn(DeviceInfo,client_sock) {
       Client.subscribe(topic1);	
       Client.subscribe(topic2);	
     });
+
+    this.set_connect = function(DeviceInfo){
+      
+      if(conn_status!=1){
+        let  MqttOption =getSign(DeviceInfo);
+        Client= mqtt.connect(MqttOption.url,{
+          username:MqttOption.username,
+          password:MqttOption.password,
+          clientId:MqttOption.clientid
+        }).then(function(){
+          const conn_status=1;
+        };
+      }
+      
+    );
 
     this.set_publish= function(topic,message){
       console.log(Client);

@@ -52,7 +52,7 @@ module.exports = function (app) {
         console.log('2');
         mqtt_conn=new MqttConn(DeviceInfo,client_sock,function(err,data){
           DeviceInfo.mqtt_status=1;
-          console.log('2');
+          console.log('3');
           return DeviceInfo.mqtt_status;
 
         });

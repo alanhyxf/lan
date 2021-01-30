@@ -174,14 +174,14 @@ module.exports = function (app) {
       //将来升级为注册指令，可以转换为msg_type处理。
        //已经注册过的设备
       var oldDevice = function (DeviceInfo) {
-        console.log("Device Exist1："+DeviceInfo.device_id);
+        console.log("Device Exist："+DeviceInfo.device_id);
         
         //MqttInit(DeviceInfo);
 
         
         if(DeviceInfo.mqtt_status==0){ 
           
-          var mqtt    = require('mqtt');
+          const mqtt    = require('async-mqtt');
 
           //let product_id = DeviceInfo.product_id;
           //let device_name = DeviceInfo.device_name;
@@ -193,6 +193,7 @@ module.exports = function (app) {
           var username = client_id + ';' + '12010126' + ';' + connid + ';' + expiry;       
           let token = '';
           var password = '';
+          var url='mqtt://'+DeviceInfo.product_id+'.iotcloud.tencentdevices.com';
           if (signmethod === 'HMAC-SHA1') {
             token=cryptojs.HmacSHA1(username, cryptojs.enc.Base64.parse(DeviceInfo.device_secret))
             password = token + ';' + 'hmacsha1'
@@ -202,7 +203,7 @@ module.exports = function (app) {
           }
 
   
-          var mqttclient  = mqtt.connect('mqtt://'+DeviceInfo.product_id+'.iotcloud.tencentdevices.com',{
+          const mqttclient  = mqtt.connect(url,{
               username,
               password,
               client_id
